@@ -1,0 +1,13 @@
+_format_version: "3.0"
+_konnect:
+  control_plane_name: dr-OnCloud
+services:
+- connect_timeout: 60000
+  enabled: true
+  host: pokeapi.co
+  name: pokemon-service
+  port: 443
+  protocol: https
+  read_timeout: 60000
+  retries: 5
+  write_timeout: 60000

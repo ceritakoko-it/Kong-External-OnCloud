@@ -1,0 +1,53 @@
+_format_version: "3.0"
+_konnect:
+  control_plane_name: prod-OnCloud
+routes:
+- hosts:
+  - prod-connect.kaotim.my
+  - prod-connect.kaotim.cloud
+  https_redirect_status_code: 426
+  name: core-api-motor-2-certificate-details-route
+  path_handling: v0
+  paths:
+  - /core-api-2/motor/certificate-details
+  plugins:
+  - config:
+      add:
+        body: []
+        headers: []
+        querystring: []
+      append:
+        body: []
+        headers: []
+        querystring: []
+      http_method: null
+      remove:
+        body: []
+        headers: []
+        querystring: []
+      rename:
+        body: []
+        headers: []
+        querystring: []
+      replace:
+        body: []
+        headers: []
+        querystring: []
+        uri: /core-api/api/v2/motor/certificate-details
+    enabled: true
+    name: request-transformer
+    protocols:
+    - grpc
+    - grpcs
+    - http
+    - https
+  preserve_host: false
+  protocols:
+  - http
+  - https
+  regex_priority: 0
+  request_buffering: true
+  response_buffering: true
+  strip_path: true
+  service:
+    name: UAT3-Kaotim

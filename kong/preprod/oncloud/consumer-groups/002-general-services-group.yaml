@@ -1,0 +1,5 @@
+_format_version: "3.0"
+_konnect:
+  control_plane_name: preprod-OnCloud
+consumer_groups:
+- name: General_Services_Group

@@ -1,0 +1,53 @@
+_format_version: "3.0"
+_konnect:
+  control_plane_name: uat-OnCloud
+routes:
+- hosts:
+  - uat-connect.kaotim.my
+  - uat-connect.kaotim.cloud
+  https_redirect_status_code: 426
+  name: core-api-1-motor-certificate-download-car-route
+  path_handling: v0
+  paths:
+  - /core-api/motor/certificates/download-car
+  plugins:
+  - config:
+      add:
+        body: []
+        headers: []
+        querystring: []
+      append:
+        body: []
+        headers: []
+        querystring: []
+      http_method: null
+      remove:
+        body: []
+        headers: []
+        querystring: []
+      rename:
+        body: []
+        headers: []
+        querystring: []
+      replace:
+        body: []
+        headers: []
+        querystring: []
+        uri: /core-api/api/v1/motor/certificates/download-car
+    enabled: true
+    name: request-transformer
+    protocols:
+    - grpc
+    - grpcs
+    - http
+    - https
+  preserve_host: false
+  protocols:
+  - http
+  - https
+  regex_priority: 0
+  request_buffering: true
+  response_buffering: true
+  strip_path: false
+  service:
+    name: UAT3-Kaotim

@@ -1,0 +1,18 @@
+_format_version: "3.0"
+_konnect:
+  control_plane_name: preprod-OnCloud
+partials:
+- config:
+    cloud_authentication: null
+    database: 0
+    host: 10.8.2.68
+    password: redis-takaful@2025
+    port: 6379
+    server_name: null
+    ssl: false
+    ssl_verify: false
+    timeout: 2000
+    username: null
+  id: 9541e197-dab6-44b6-b915-9fa84ded895e
+  name: on-cloud-preprod-redis
+  type: redis-ce

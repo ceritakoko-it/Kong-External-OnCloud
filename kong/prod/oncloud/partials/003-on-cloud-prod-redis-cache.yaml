@@ -1,0 +1,30 @@
+_format_version: "3.0"
+_konnect:
+  control_plane_name: prod-OnCloud
+partials:
+- config:
+    cloud_authentication: null
+    cluster_max_redirections: 5
+    cluster_nodes: null
+    connect_timeout: 2000
+    connection_is_proxied: false
+    database: 0
+    host: 10.8.2.68
+    keepalive_backlog: 0
+    keepalive_pool_size: 256
+    password: redis-takaful@2025
+    port: 6379
+    read_timeout: 2000
+    send_timeout: 2000
+    sentinel_master: null
+    sentinel_nodes: null
+    sentinel_password: null
+    sentinel_role: null
+    sentinel_username: null
+    server_name: null
+    ssl: false
+    ssl_verify: false
+    username: null
+  id: 3c5ba52d-ad6c-4027-a92b-24121026097e
+  name: on-cloud-prod-redis-cache
+  type: redis-ee

@@ -1,0 +1,18 @@
+_format_version: "3.0"
+_konnect:
+  control_plane_name: dr-OnCloud
+partials:
+- config:
+    cloud_authentication: null
+    database: 0
+    host: 47.236.55.30
+    password: izenotes@123
+    port: 6379
+    server_name: null
+    ssl: false
+    ssl_verify: false
+    timeout: 2000
+    username: null
+  id: b1bf963b-05df-4965-a3a9-a1006f94a45f
+  name: test-izeno-redis
+  type: redis-ce

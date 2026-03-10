@@ -1,0 +1,42 @@
+_format_version: "3.0"
+_konnect:
+  control_plane_name: dr-OnCloud
+consumers:
+- custom_id: dezi8ouoh4lnl0j6
+  groups:
+  - name: Core_API_Group
+  jwt_secrets:
+  - algorithm: HS256
+    key: core-api-claim
+    secret: core-api-value
+  plugins:
+  - config:
+      day: null
+      error_code: 429
+      error_message: API rate limit exceeded
+      fault_tolerant: true
+      header_name: null
+      hide_client_headers: false
+      hour: null
+      limit_by: consumer
+      minute: 100
+      month: null
+      path: null
+      policy: redis
+      redis_server_name: null
+      redis_username: null
+      second: null
+      sync_rate: -1
+      year: null
+    enabled: false
+    name: rate-limiting
+    partials:
+    - id: 9541e197-dab6-44b6-b915-9fa84ded895e
+      name: on-cloud-dr-redis
+      path: config.redis
+    protocols:
+    - grpc
+    - grpcs
+    - http
+    - https
+  username: standard_core_api_user
