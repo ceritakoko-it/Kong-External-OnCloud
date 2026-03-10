@@ -30,7 +30,7 @@ parameters:
 - name: rollbackBuildId
   displayName: Rollback source Build ID
   type: string
-  default: ''
+  default: 'not-required'
 
 stages:
 - stage: Validate_Run_Rules

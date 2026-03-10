@@ -11,7 +11,7 @@ stages:
   displayName: Rollback to ${{ parameters.environment }} - ${{ parameters.controlPlane }}
   condition: and(
     succeeded(),
-    ne('${{ parameters.rollbackBuildId }}', ''),
+    ne('${{ parameters.rollbackBuildId }}', 'not-required'),
     or(
       and(eq('${{ parameters.environment }}', 'Dev'), eq(variables['Build.SourceBranch'], 'refs/heads/development')),
       and(eq('${{ parameters.environment }}', 'Uat'), eq(variables['Build.SourceBranch'], 'refs/heads/master')),
@@ -45,6 +45,10 @@ stages:
         test -n "${KONG_TOKEN:-}" || { echo "KONG_TOKEN is empty or not set"; exit 1; }
         test -n "${KONG_ADDR:-}" || { echo "KONG_ADDR is empty or not set"; exit 1; }
         test -n "${ROLLBACK_BUILD_ID:-}" || { echo "rollbackBuildId parameter is empty"; exit 1; }
+        if [ "$ROLLBACK_BUILD_ID" = "not-required" ]; then
+          echo "rollbackBuildId is required when mode=rollback"
+          exit 1
+        fi
       displayName: Validate required variables
       env:
         KONG_TOKEN: $(KONG_TOKEN)
