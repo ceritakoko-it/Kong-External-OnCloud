@@ -1,4 +1,4 @@
-﻿_format_version: "3.0"
+_format_version: "3.0"
 _konnect:
   control_plane_name: Dev-OnCloud
 routes:
@@ -6,10 +6,12 @@ routes:
   - dev-connect.kaotim.my
   - dev-connect.kaotim.cloud
   https_redirect_status_code: 426
-  name: core-api-1-motor-certificate-download-car-route
+  methods:
+  - POST
+  name: core-api-v1-family-certificate-download-route
   path_handling: v0
   paths:
-  - /core-api/motor/certificates/download-car
+  - /core-api/family/download
   plugins:
   - config:
       add:
@@ -33,7 +35,7 @@ routes:
         body: []
         headers: []
         querystring: []
-        uri: /core-api/api/v1/motor/certificates/download-car
+        uri: /core-api/api/v1/family/download
     enabled: true
     name: request-transformer
     protocols:
@@ -48,6 +50,10 @@ routes:
   regex_priority: 0
   request_buffering: true
   response_buffering: true
-  strip_path: false
+  strip_path: true
+  tags:
+  - coreApi
+  - v1
+  - family
   service:
     name: UAT3-Kaotim

@@ -234,6 +234,7 @@ consumer_groups:
 - name: Core_API_Group
 - name: General_Services_Group
 consumers:
+- username: naluri-dev
 - custom_id: dezi8ouoh4lnl0j6
   groups:
   - name: Core_API_Group
@@ -466,24 +467,50 @@ services:
       functions:
       - |-
         return function(status, body, headers)
-            -- Check if body exists to avoid Lua 'nil' errors
             body = body or {}
 
-            if status == 401 then
-                -- Alter the HTTP status code to 8401
-                body.message = "Unauthorized"
-                body.internal_code = 8401
-                body.error_type = "API_UNAUTHORIZED"
-            elseif status == 403 then
-                body.message = "Forbidden, detected as bot"
-                body.internal_code = 8403
-            elseif status == 429 then
-                body.message = "Retry again later"
-                body.internal_code = 8429
-            elseif status == 404 then
-                status = 8404
-                body.message = "Resource not found"
-                body.internal_code = 8404
+            local is_kong_id = headers["x-kong-request-id"] or headers["X-Kong-Request-ID"]
+            local auth_header = headers["www-authenticate"] or headers["WWW-Authenticate"] or ""
+            local is_oidc_error = string.find(auth_header, "konghq.com") ~= nil
+
+            if is_kong_id or is_oidc_error then
+                if status == 400 then
+                    body.internal_code = 8400
+                    body.error_type = "API_INVALID_REQUEST"
+                    body.message = "Invalid request parameters"
+                elseif status == 401 then
+                    body.internal_code = 8401
+                    body.error_type = "API_UNAUTHORIZED"
+                    body.message = "Authentication failed"
+                elseif status == 403 then
+                    body.internal_code = 8403
+                    body.error_type = "API_FORBIDDEN"
+                    body.message = "Insufficient permissions"
+                elseif status == 404 then
+                    body.internal_code = 8404
+                    body.error_type = "API_NOT_FOUND"
+                    body.message = "Resource not found"
+                elseif status == 409 then
+                    body.internal_code = 8409
+                    body.error_type = "API_DUPLICATE_REQUEST"
+                    body.message = "Duplicate idempotency key"
+                elseif status == 422 then
+                    body.internal_code = 8422
+                    body.error_type = "API_VALIDATION_ERROR"
+                    body.message = "Validation failed"
+                elseif status == 429 then
+                    body.internal_code = 8429
+                    body.error_type = "API_RATE_LIMIT_EXCEEDED"
+                    body.message = "Too many requests"
+                elseif status == 500 then
+                    body.internal_code = 8500
+                    body.error_type = "API_INTERNAL_ERROR"
+                    body.message = "Internal server error"
+                elseif status == 503 then
+                    body.internal_code = 8503
+                    body.error_type = "API_SERVICE_UNAVAILABLE"
+                    body.message = "Service temporarily unavailable"
+                end
             end
 
             return status, body, headers
@@ -551,9 +578,11 @@ services:
       - body
       client_id:
       - '{vault://identity/client_id_core_api}'
+      - '{vault://identity/naluri-dev-client-id}'
       client_jwk: null
       client_secret:
       - '{vault://identity/client_secret_core_api}'
+      - '{vault://identity/naluri-dev-secret-key}'
       cluster_cache_redis:
         cloud_authentication:
           auth_provider: null
@@ -900,117 +929,9 @@ services:
     - dev-connect.kaotim.my
     - dev-connect.kaotim.cloud
     https_redirect_status_code: 426
-    name: core-api-1-motor-certificate-download-car-route
-    path_handling: v0
-    paths:
-    - /core-api/motor/certificates/download-car
-    plugins:
-    - config:
-        add:
-          body: []
-          headers: []
-          querystring: []
-        append:
-          body: []
-          headers: []
-          querystring: []
-        http_method: null
-        remove:
-          body: []
-          headers: []
-          querystring: []
-        rename:
-          body: []
-          headers: []
-          querystring: []
-        replace:
-          body: []
-          headers: []
-          querystring: []
-          uri: /core-api/api/v1/motor/certificates/download-car
-      enabled: true
-      name: request-transformer
-      protocols:
-      - grpc
-      - grpcs
-      - http
-      - https
-    preserve_host: false
-    protocols:
-    - http
-    - https
-    regex_priority: 0
-    request_buffering: true
-    response_buffering: true
-    strip_path: false
-  - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
-    https_redirect_status_code: 426
-    name: core-api-1-motor-download-motorcycle-route
-    path_handling: v0
-    paths:
-    - /core-api/motor/certificates/download-motorcycle
-    plugins:
-    - config:
-        add:
-          body: []
-          headers: []
-          querystring: []
-        append:
-          body: []
-          headers: []
-          querystring: []
-        http_method: null
-        remove:
-          body: []
-          headers: []
-          querystring: []
-        rename:
-          body: []
-          headers: []
-          querystring: []
-        replace:
-          body: []
-          headers: []
-          querystring: []
-          uri: /core-api/api/v1/motor/certificates/download-motorcycle
-      enabled: true
-      name: request-transformer
-      protocols:
-      - grpc
-      - grpcs
-      - http
-      - https
-    preserve_host: false
-    protocols:
-    - http
-    - https
-    regex_priority: 0
-    request_buffering: true
-    response_buffering: true
-    strip_path: true
-  - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
-    https_redirect_status_code: 426
-    name: core-api-2-family-certificate-details-route
-    path_handling: v0
-    paths:
-    - /core-api-2/family/certificate-details
-    preserve_host: false
-    protocols:
-    - http
-    - https
-    regex_priority: 0
-    request_buffering: true
-    response_buffering: true
-    strip_path: true
-  - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
-    https_redirect_status_code: 426
-    name: core-api-family-1-download-route
+    methods:
+    - POST
+    name: core-api-v1-family-certificate-download-route
     path_handling: v0
     paths:
     - /core-api/family/download
@@ -1053,11 +974,233 @@ services:
     request_buffering: true
     response_buffering: true
     strip_path: true
+    tags:
+    - coreApi
+    - v1
+    - family
   - hosts:
     - dev-connect.kaotim.my
     - dev-connect.kaotim.cloud
     https_redirect_status_code: 426
-    name: core-api-motor-1-ereceipt-download-route
+    methods:
+    - GET
+    name: core-api-v1-family-certificate-list-route
+    path_handling: v0
+    paths:
+    - /core-api/api/v1/family/certificates
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+    tags:
+    - core-api
+    - v1
+    - family
+  - hosts:
+    - dev-connect.kaotim.my
+    - dev-connect.kaotim.cloud
+    https_redirect_status_code: 426
+    methods:
+    - GET
+    name: core-api-v1-family-customer-profile-route
+    path_handling: v0
+    paths:
+    - /core-api/api/v1/family/customers/profile
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+    tags:
+    - coreApi
+    - v1
+    - family
+  - hosts:
+    - dev-connect.kaotim.my
+    - dev-connect.kaotim.cloud
+    https_redirect_status_code: 426
+    methods:
+    - GET
+    name: core-api-v1-kaotim-customer-profile-route
+    path_handling: v0
+    paths:
+    - /core-api/api/v1/customers/profile
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+    tags:
+    - core-api
+    - v1
+    - kaotim
+  - hosts:
+    - dev-connect.kaotim.my
+    - dev-connect.kaotim.cloud
+    https_redirect_status_code: 426
+    methods:
+    - POST
+    name: core-api-v1-motor-certificate-download-car-route
+    path_handling: v0
+    paths:
+    - /core-api/motor/certificates/download-car
+    plugins:
+    - config:
+        add:
+          body: []
+          headers: []
+          querystring: []
+        append:
+          body: []
+          headers: []
+          querystring: []
+        http_method: null
+        remove:
+          body: []
+          headers: []
+          querystring: []
+        rename:
+          body: []
+          headers: []
+          querystring: []
+        replace:
+          body: []
+          headers: []
+          querystring: []
+          uri: /core-api/api/v1/motor/certificates/download-car
+      enabled: true
+      name: request-transformer
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+    tags:
+    - coreApi
+    - v1
+    - motor
+  - hosts:
+    - dev-connect.kaotim.my
+    - dev-connect.kaotim.cloud
+    https_redirect_status_code: 426
+    methods:
+    - POST
+    name: core-api-v1-motor-certificate-download-motorcycle-route
+    path_handling: v0
+    paths:
+    - /core-api/motor/certificates/download-motorcycle
+    plugins:
+    - config:
+        add:
+          body: []
+          headers: []
+          querystring: []
+        append:
+          body: []
+          headers: []
+          querystring: []
+        http_method: null
+        remove:
+          body: []
+          headers: []
+          querystring: []
+        rename:
+          body: []
+          headers: []
+          querystring: []
+        replace:
+          body: []
+          headers: []
+          querystring: []
+          uri: /core-api/api/v1/motor/certificates/download-motorcycle
+      enabled: true
+      name: request-transformer
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+    tags:
+    - coreApi
+    - v1
+    - motor
+  - hosts:
+    - dev-connect.kaotim.my
+    - dev-connect.kaotim.cloud
+    https_redirect_status_code: 426
+    methods:
+    - GET
+    name: core-api-v1-motor-certificate-list-route
+    path_handling: v0
+    paths:
+    - /core-api/api/v1/motor/certificates
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+    tags:
+    - coreApi
+    - v1
+    - motor
+  - hosts:
+    - dev-connect.kaotim.my
+    - dev-connect.kaotim.cloud
+    https_redirect_status_code: 426
+    methods:
+    - GET
+    name: core-api-v1-motor-customer-profile-route
+    path_handling: v0
+    paths:
+    - /core-api/api/v1/motor/customers/profile
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+    tags:
+    - coreApi
+    - v1
+    - motor
+  - hosts:
+    - dev-connect.kaotim.my
+    - dev-connect.kaotim.cloud
+    https_redirect_status_code: 426
+    methods:
+    - POST
+    name: core-api-v1-motor-ereceipt-download-route
     path_handling: v0
     paths:
     - /core-api/motor/e-receipt/download
@@ -1084,7 +1227,7 @@ services:
           body: []
           headers: []
           querystring: []
-          uri: /core-api//api/v1/motor/e-receipt/download
+          uri: /core-api/api/v1/motor/e-receipt/download
       enabled: true
       name: request-transformer
       protocols:
@@ -1100,11 +1243,39 @@ services:
     request_buffering: true
     response_buffering: true
     strip_path: true
+    tags:
+    - coreApi
+    - v1
+    - motor
   - hosts:
     - dev-connect.kaotim.my
     - dev-connect.kaotim.cloud
     https_redirect_status_code: 426
-    name: core-api-motor-2-certificate-details-route
+    methods:
+    - GET
+    name: core-api-v2-family-certificate-details-route
+    path_handling: v0
+    paths:
+    - /core-api-2/family/certificate-details
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+    tags:
+    - coreApi
+    - v2
+    - family
+  - hosts:
+    - dev-connect.kaotim.my
+    - dev-connect.kaotim.cloud
+    https_redirect_status_code: 426
+    methods:
+    - GET
+    name: core-api-v2-motor-certificate-details-route
     path_handling: v0
     paths:
     - /core-api-2/motor/certificate-details
@@ -1147,11 +1318,17 @@ services:
     request_buffering: true
     response_buffering: true
     strip_path: true
+    tags:
+    - core-api
+    - v2
+    - motor
   - hosts:
     - dev-connect.kaotim.my
     - dev-connect.kaotim.cloud
     https_redirect_status_code: 426
-    name: general-services-create-cp-id-retry-failed-route
+    methods:
+    - GET
+    name: general-services-v1-create-cp-id-retry-failed-route
     path_handling: v0
     paths:
     - /general-services/create-cp-id/retry-failed
@@ -1194,11 +1371,16 @@ services:
     request_buffering: true
     response_buffering: true
     strip_path: true
+    tags:
+    - generalServices
+    - v1
   - hosts:
     - dev-connect.kaotim.my
     - dev-connect.kaotim.cloud
     https_redirect_status_code: 426
-    name: general-services-create-cp-id-route
+    methods:
+    - POST
+    name: general-services-v1-create-cp-id-route
     path_handling: v0
     paths:
     - /general-services/create-cp-id
@@ -1241,13 +1423,16 @@ services:
     request_buffering: true
     response_buffering: true
     strip_path: true
+    tags:
+    - generalServices
+    - v1
   - hosts:
     - dev-connect.kaotim.my
     - dev-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - POST
-    name: general-services-motor-decrypt-renewal-link-route
+    name: general-services-v1-motor-decrypt-renewal-link-route
     path_handling: v0
     paths:
     - /general-services/motor/decrypt-renewal-link
@@ -1326,11 +1511,16 @@ services:
     request_buffering: true
     response_buffering: true
     strip_path: false
+    tags:
+    - generalServices
+    - v1
   - hosts:
     - dev-connect.kaotim.my
     - dev-connect.kaotim.cloud
     https_redirect_status_code: 426
-    name: general-services-motor-generate-renewal-link-route
+    methods:
+    - POST
+    name: general-services-v1-motor-generate-renewal-link-route
     path_handling: v0
     paths:
     - /general-services/motor/generate-renewal-link
@@ -1373,6 +1563,9 @@ services:
     request_buffering: true
     response_buffering: true
     strip_path: true
+    tags:
+    - generalServices
+    - v1
   write_timeout: 60000
 - connect_timeout: 60000
   enabled: true
@@ -1389,7 +1582,7 @@ services:
     https_redirect_status_code: 426
     methods:
     - GET
-    name: pokemon-name-route
+    name: pokemon-sample-route
     path_handling: v0
     paths:
     - ~/api/pokemon/(.*)$

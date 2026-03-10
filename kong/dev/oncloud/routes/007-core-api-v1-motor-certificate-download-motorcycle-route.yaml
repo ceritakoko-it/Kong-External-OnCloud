@@ -1,4 +1,4 @@
-﻿_format_version: "3.0"
+_format_version: "3.0"
 _konnect:
   control_plane_name: Dev-OnCloud
 routes:
@@ -6,7 +6,9 @@ routes:
   - dev-connect.kaotim.my
   - dev-connect.kaotim.cloud
   https_redirect_status_code: 426
-  name: core-api-1-motor-download-motorcycle-route
+  methods:
+  - POST
+  name: core-api-v1-motor-certificate-download-motorcycle-route
   path_handling: v0
   paths:
   - /core-api/motor/certificates/download-motorcycle
@@ -49,5 +51,9 @@ routes:
   request_buffering: true
   response_buffering: true
   strip_path: true
+  tags:
+  - coreApi
+  - v1
+  - motor
   service:
     name: UAT3-Kaotim

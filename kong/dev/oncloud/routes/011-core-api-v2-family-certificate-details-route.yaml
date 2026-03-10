@@ -4,17 +4,25 @@ _konnect:
 routes:
 - hosts:
   - dev-connect.kaotim.my
+  - dev-connect.kaotim.cloud
   https_redirect_status_code: 426
-  name: OIDC-Get-Token
+  methods:
+  - GET
+  name: core-api-v2-family-certificate-details-route
   path_handling: v0
   paths:
-  - /api/token
+  - /core-api-2/family/certificate-details
   preserve_host: false
   protocols:
+  - http
   - https
   regex_priority: 0
   request_buffering: true
   response_buffering: true
   strip_path: true
+  tags:
+  - coreApi
+  - v2
+  - family
   service:
-    name: Dev-OnCloud-Get-Token
+    name: UAT3-Kaotim
