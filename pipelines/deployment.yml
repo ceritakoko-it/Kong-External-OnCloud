@@ -22,6 +22,16 @@ stages:
 
     - bash: |
         set -euo pipefail
+        git checkout --force "$(Build.SourceVersion)"
+        ACTUAL_COMMIT="$(git rev-parse HEAD)"
+        echo "Branch: $(Build.SourceBranch)"
+        echo "Requested commit: $(Build.SourceVersion)"
+        echo "Checked out commit: ${ACTUAL_COMMIT}"
+        test "$ACTUAL_COMMIT" = "$(Build.SourceVersion)"
+      displayName: Pin checkout to selected commit
+
+    - bash: |
+        set -euo pipefail
         DECK_VERSION="1.52.0"
         curl -sL "https://github.com/Kong/deck/releases/download/v${DECK_VERSION}/deck_${DECK_VERSION}_linux_amd64.tar.gz" -o deck.tar.gz
         tar -xzf deck.tar.gz
