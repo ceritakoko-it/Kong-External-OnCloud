@@ -6,10 +6,12 @@ routes:
   - uat-connect.kaotim.my
   - uat-connect.kaotim.cloud
   https_redirect_status_code: 426
-  name: core-api-2-family-certificate-details-route
+  methods:
+  - GET
+  name: core-api-v1-kaotim-customer-profile-route
   path_handling: v0
   paths:
-  - /core-api-2/family/certificate-details
+  - /core-api/api/v1/customers/profile
   preserve_host: false
   protocols:
   - http
@@ -17,6 +19,10 @@ routes:
   regex_priority: 0
   request_buffering: true
   response_buffering: true
-  strip_path: true
+  strip_path: false
+  tags:
+  - core-api
+  - v1
+  - kaotim
   service:
     name: UAT3-Kaotim

@@ -6,10 +6,12 @@ routes:
   - uat-connect.kaotim.my
   - uat-connect.kaotim.cloud
   https_redirect_status_code: 426
-  name: general-services-create-cp-id-route
+  methods:
+  - POST
+  name: general-services-v1-motor-generate-renewal-link-route
   path_handling: v0
   paths:
-  - /general-services/create-cp-id
+  - /general-services/motor/generate-renewal-link
   plugins:
   - config:
       add:
@@ -33,7 +35,7 @@ routes:
         body: []
         headers: []
         querystring: []
-        uri: /kaotim-general-services/api/v1/create-cp-id
+        uri: /kaotim-general-services/api/v1/motor/generate-renewal-link
     enabled: true
     name: request-transformer
     protocols:
@@ -49,5 +51,8 @@ routes:
   request_buffering: true
   response_buffering: true
   strip_path: true
+  tags:
+  - generalServices
+  - v1
   service:
     name: UAT3-Kaotim

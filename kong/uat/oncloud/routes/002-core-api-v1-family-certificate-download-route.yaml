@@ -6,10 +6,12 @@ routes:
   - uat-connect.kaotim.my
   - uat-connect.kaotim.cloud
   https_redirect_status_code: 426
-  name: general-services-create-cp-id-retry-failed-route
+  methods:
+  - POST
+  name: core-api-v1-family-certificate-download-route
   path_handling: v0
   paths:
-  - /general-services/create-cp-id/retry-failed
+  - /core-api/family/download
   plugins:
   - config:
       add:
@@ -33,7 +35,7 @@ routes:
         body: []
         headers: []
         querystring: []
-        uri: /kaotim-general-services/api/v1/create-cp-id/retry-failed
+        uri: /core-api/api/v1/family/download
     enabled: true
     name: request-transformer
     protocols:
@@ -49,5 +51,9 @@ routes:
   request_buffering: true
   response_buffering: true
   strip_path: true
+  tags:
+  - coreApi
+  - v1
+  - family
   service:
     name: UAT3-Kaotim

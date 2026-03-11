@@ -1,4 +1,4 @@
-_format_version: "3.0"
+﻿_format_version: "3.0"
 _konnect:
   control_plane_name: uat-OnCloud
 consumers:
@@ -31,8 +31,7 @@ consumers:
     enabled: false
     name: rate-limiting
     partials:
-    - id: 9541e197-dab6-44b6-b915-9fa84ded895e
-      name: on-cloud-uat-redis
+    - name: on-cloud-uat-redis
       path: config.redis
     protocols:
     - grpc
