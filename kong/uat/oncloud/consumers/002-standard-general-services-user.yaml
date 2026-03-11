@@ -1,6 +1,6 @@
-﻿_format_version: "3.0"
+_format_version: "3.0"
 _konnect:
-  control_plane_name: uat-OnCloud
+  control_plane_name: Uat-OnCloud
 consumers:
 - custom_id: l3f3ed8rxuvba8k6
   groups:
@@ -35,3 +35,4 @@ consumers:
     - http
     - https
   username: standard_general_services_user
+

@@ -1,6 +1,6 @@
-﻿_format_version: "3.0"
+_format_version: "3.0"
 _konnect:
-  control_plane_name: uat-OnCloud
+  control_plane_name: Uat-OnCloud
 partials:
 - config:
     cloud_authentication: null
@@ -15,3 +15,4 @@ partials:
     username: null
   name: on-cloud-uat-redis
   type: redis-ce
+

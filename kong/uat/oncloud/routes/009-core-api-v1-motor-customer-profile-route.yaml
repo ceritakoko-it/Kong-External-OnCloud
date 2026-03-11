@@ -1,6 +1,6 @@
 _format_version: "3.0"
 _konnect:
-  control_plane_name: uat-OnCloud
+  control_plane_name: Uat-OnCloud
 routes:
 - hosts:
   - uat-connect.kaotim.my
@@ -26,3 +26,4 @@ routes:
   - motor
   service:
     name: UAT3-Kaotim
+

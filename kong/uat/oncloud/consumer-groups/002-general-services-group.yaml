@@ -1,5 +1,6 @@
-﻿_format_version: "3.0"
+_format_version: "3.0"
 _konnect:
-  control_plane_name: uat-OnCloud
+  control_plane_name: Uat-OnCloud
 consumer_groups:
 - name: General_Services_Group
+
