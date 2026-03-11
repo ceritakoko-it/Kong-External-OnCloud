@@ -4,7 +4,7 @@ _konnect:
 services:
 - connect_timeout: 60000
   enabled: true
-  host: uat3-apigw.kaotim.my
+  host: __KAOTIM_SERVICE_HOST__
   name: UAT3-Kaotim
   plugins:
   - config:

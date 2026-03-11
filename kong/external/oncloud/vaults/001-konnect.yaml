@@ -3,6 +3,6 @@ _konnect:
   control_plane_name: __CONTROL_PLANE_NAME__
 vaults:
 - config:
-    config_store_id: 2e3326f0-6e90-44bb-9dcf-eeffd9318c7b
+    config_store_id: __VAULT_CONFIG_STORE_ID__
   name: konnect
   prefix: identity

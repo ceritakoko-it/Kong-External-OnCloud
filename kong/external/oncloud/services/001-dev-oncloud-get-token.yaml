@@ -4,7 +4,7 @@ _konnect:
 services:
 - connect_timeout: 60000
   enabled: true
-  host: 4vboyhsix88r649o.sg.identity.konghq.com
+  host: __GET_TOKEN_SERVICE_HOST__
   name: __CONTROL_PLANE_NAME__-Get-Token
   path: /auth/oauth/token
   port: 443
