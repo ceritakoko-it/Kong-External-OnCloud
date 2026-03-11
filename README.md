@@ -17,7 +17,7 @@ For `OnCloud`, the source of truth is now the shared base at `kong/external/oncl
 ## Branching Strategy
 
 - `development` is used for deployment to Dev.
-- `master` is used for deployment to Uat, promotions to PreProd/Prod/Dr, and rollback to Uat/Prod.
+- `master` is used for deployment to Uat, promotions to PreProd/Prod/DR, and rollback to Uat/Prod.
 - Feature work is done in feature branches and merged via PR.
 - Hotfix work can branch from `master` and merge back to `master`.
 
@@ -31,7 +31,7 @@ The pipeline is manual-only:
 Run via Azure DevOps `Run pipeline` with parameters:
 
 - `mode`: `deployment` or `promotion` or `rollback`
-- `environment`: `Dev`, `Uat`, `PreProd`, `Prod`, `Dr`
+- `environment`: `Dev`, `Uat`, `PreProd`, `Prod`, `DR`
 - `controlPlane`: `OnCloud` or `OnPremise`
 - `rollbackBuildId`: required when `mode=rollback`, points to the source pipeline `BuildId` that published backup artifact
 
@@ -61,9 +61,9 @@ Allowed combinations:
 - `environment=Prod`
 - branch `refs/heads/master`
 
-5. Promotion Prod -> Dr
+5. Promotion Prod -> DR
 - `mode=promotion`
-- `environment=Dr`
+- `environment=DR`
 - branch `refs/heads/master`
 
 6. Rollback to Dev
@@ -175,7 +175,7 @@ flowchart TD
     E7 --> Z
 
     F --> F1{environment}
-    F1 -->|PreProd/Prod/Dr| F4[Resolve target env file and render shared OnCloud state]
+    F1 -->|PreProd/Prod/DR| F4[Resolve target env file and render shared OnCloud state]
     F4 --> F5[Ping + File Validate + Diff]
     F5 --> F6{Created/Updated/Deleted > 0?}
     F6 -->|No| Z
