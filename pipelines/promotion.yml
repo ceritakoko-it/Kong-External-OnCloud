@@ -7,11 +7,7 @@
 stages:
 - stage: Promote_To_${{ parameters.environment }}_${{ parameters.controlPlane }}
   displayName: Promote to ${{ parameters.environment }} - ${{ parameters.controlPlane }}
-  condition: and(
-    succeeded(),
-    eq(variables['Build.SourceBranch'], 'refs/heads/master'),
-    or(eq('${{ parameters.environment }}', 'PreProd'), eq('${{ parameters.environment }}', 'Prod'), eq('${{ parameters.environment }}', 'Dr'))
-  )
+  condition: "and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), or(eq('${{ parameters.environment }}', 'PreProd'), eq('${{ parameters.environment }}', 'Prod'), eq('${{ parameters.environment }}', 'Dr')))"
   jobs:
   - job: Promote
     displayName: Promote modular state
