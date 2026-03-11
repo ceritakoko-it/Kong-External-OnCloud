@@ -1,0 +1,59 @@
+_format_version: "3.0"
+_konnect:
+  control_plane_name: __CONTROL_PLANE_NAME__
+routes:
+- hosts:
+  - __PUBLIC_HOST_PRIMARY__
+  - __PUBLIC_HOST_SECONDARY__
+  https_redirect_status_code: 426
+  methods:
+  - POST
+  name: core-api-v1-motor-ereceipt-download-route
+  path_handling: v0
+  paths:
+  - /core-api/motor/e-receipt/download
+  plugins:
+  - config:
+      add:
+        body: []
+        headers: []
+        querystring: []
+      append:
+        body: []
+        headers: []
+        querystring: []
+      http_method: null
+      remove:
+        body: []
+        headers: []
+        querystring: []
+      rename:
+        body: []
+        headers: []
+        querystring: []
+      replace:
+        body: []
+        headers: []
+        querystring: []
+        uri: /core-api/api/v1/motor/e-receipt/download
+    enabled: true
+    name: request-transformer
+    protocols:
+    - grpc
+    - grpcs
+    - http
+    - https
+  preserve_host: false
+  protocols:
+  - http
+  - https
+  regex_priority: 0
+  request_buffering: true
+  response_buffering: true
+  strip_path: true
+  tags:
+  - coreApi
+  - v1
+  - motor
+  service:
+    name: UAT3-Kaotim

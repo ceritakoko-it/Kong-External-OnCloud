@@ -1,0 +1,30 @@
+_format_version: "3.0"
+_konnect:
+  control_plane_name: __CONTROL_PLANE_NAME__
+partials:
+- config:
+    cloud_authentication: null
+    cluster_max_redirections: 5
+    cluster_nodes: null
+    connect_timeout: 2000
+    connection_is_proxied: false
+    database: 0
+    host: 47.236.55.30
+    keepalive_backlog: 0
+    keepalive_pool_size: 256
+    password: izenotes@123
+    port: 6379
+    read_timeout: 2000
+    send_timeout: 2000
+    sentinel_master: null
+    sentinel_nodes: null
+    sentinel_password: null
+    sentinel_role: null
+    sentinel_username: null
+    server_name: null
+    ssl: false
+    ssl_verify: false
+    username: null
+  id: 81a39a77-b8d4-4860-a068-5d927ec5da2a
+  name: izeno-redis-cache
+  type: redis-ee

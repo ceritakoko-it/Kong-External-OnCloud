@@ -1,0 +1,28 @@
+_format_version: "3.0"
+_konnect:
+  control_plane_name: __CONTROL_PLANE_NAME__
+routes:
+- hosts:
+  - __PUBLIC_HOST_PRIMARY__
+  - __PUBLIC_HOST_SECONDARY__
+  https_redirect_status_code: 426
+  methods:
+  - GET
+  name: core-api-v2-family-certificate-details-route
+  path_handling: v0
+  paths:
+  - /core-api-2/family/certificate-details
+  preserve_host: false
+  protocols:
+  - http
+  - https
+  regex_priority: 0
+  request_buffering: true
+  response_buffering: true
+  strip_path: true
+  tags:
+  - coreApi
+  - v2
+  - family
+  service:
+    name: UAT3-Kaotim

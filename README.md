@@ -2,6 +2,8 @@
 
 This repository is the source of truth for Kong decK configuration and promotion flow across environments.
 
+For `OnCloud`, the source of truth is now the shared base at `kong/external/oncloud`, rendered with environment files under `kong/env/`.
+
 ## Naming Conventions
 
 | Component | Naming Convention | Sample |
@@ -94,14 +96,22 @@ Shared high-level behavior:
 7. Publish backup as pipeline artifact.
 8. Run `deck gateway sync`.
 
+OnCloud repository behavior:
+
+1. `kong/external/oncloud` is the shared base template.
+2. The selected target environment loads:
+- `kong/env/dev-oncloud.env`
+- `kong/env/uat-oncloud.env`
+- `kong/env/preprod-oncloud.env`
+- `kong/env/prod-oncloud.env`
+- `kong/env/dr-oncloud.env`
+3. The pipeline renders the shared base into a temporary folder and deploys that rendered output.
+4. Existing `kong/<env>/oncloud` folders can remain in the repo during transition, but the pipeline prefers the shared base when it exists.
+
 Promotion-specific repository behavior:
 
-1. Promotion rebuilds target folder in repo working tree:
-- `Uat -> PreProd` uses `kong/uat/<cp>` as source and rewrites into `kong/preprod/<cp>`
-- `PreProd -> Prod` uses `kong/preprod/<cp>` as source and rewrites into `kong/prod/<cp>`
-- `Prod -> Dr` uses `kong/prod/<cp>` as source and rewrites into `kong/dr/<cp>`
-2. It rewrites environment tokens in YAML and updates `control_plane_name`.
-3. If folder content changed, pipeline commits and pushes those folder updates back to the same branch.
+1. For shared `OnCloud`, promotion no longer copies repo folders. It renders `kong/external/oncloud` using the target environment file and deploys directly to the target control plane.
+2. Legacy folder-copy promotion is still used for control planes that do not have a shared base template.
 
 ## Backup Mechanism
 
@@ -128,7 +138,7 @@ Rollback re-applies backup dump state from a previous run artifact to the select
 
 1. Validate run rules and ensure `rollbackBuildId` is provided.
 2. Download artifact named `kong-backup-<environment>-<controlPlane>-<rollbackBuildId>`.
-3. Resolve rollback source file using `*-current-before-sync-*.yaml`.
+3. Resolve rollback source file using the exact `rollbackBackupFile` parameter value.
 4. Run `deck gateway ping`, `deck file validate`, and `diff`.
 5. If diff shows changes, execute `deck gateway sync` using the resolved rollback dump file.
 
@@ -154,8 +164,9 @@ flowchart TD
     D -->|promotion| F[Promote Stage]
 
     E --> E1[Install decK + Validate Vars]
-    E1 --> E2[Resolve Dev/Uat target path/control plane]
-    E2 --> E3[Ping + File Validate + Diff]
+    E1 --> E2[Resolve target path, env file, control plane]
+    E2 --> E21[Render shared OnCloud state when available]
+    E21 --> E3[Ping + File Validate + Diff]
     E3 --> E4{Created/Updated/Deleted > 0?}
     E4 -->|No| Z[Finish - No Sync]
     E4 -->|Yes| E5[Backup current]
@@ -164,14 +175,8 @@ flowchart TD
     E7 --> Z
 
     F --> F1{environment}
-    F1 -->|PreProd| F2[Source: kong/uat/*]
-    F1 -->|Prod| F3[Source: kong/preprod/*]
-    F1 -->|Dr| F31[Source: kong/prod/*]
-    F2 --> F4[Build promoted state + rewrite env tokens]
-    F3 --> F4
-    F31 --> F4
-    F4 --> F41[Commit and push target folder if changed]
-    F41 --> F5[Ping + File Validate + Diff]
+    F1 -->|PreProd/Prod/Dr| F4[Resolve target env file and render shared OnCloud state]
+    F4 --> F5[Ping + File Validate + Diff]
     F5 --> F6{Created/Updated/Deleted > 0?}
     F6 -->|No| Z
     F6 -->|Yes| F7[Backup current]

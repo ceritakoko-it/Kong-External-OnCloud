@@ -1,6 +1,0 @@
-_format_version: "3.0"
-_konnect:
-  control_plane_name: dr-OnCloud
-consumers:
-- custom_id: rfx8ryb59fu3gbu6
-  username: zunnur-consumer
