@@ -1,6 +1,6 @@
-﻿_format_version: "3.0"
+_format_version: "3.0"
 _konnect:
-  control_plane_name: uat-OnCloud
+  control_plane_name: Uat-OnCloud
 partials:
 - config:
     cloud_authentication: null
@@ -16,3 +16,4 @@ partials:
   id: b1bf963b-05df-4965-a3a9-a1006f94a45f
   name: test-izeno-redis
   type: redis-ce
+

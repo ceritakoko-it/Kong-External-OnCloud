@@ -1,8 +1,0 @@
-_format_version: "3.0"
-_konnect:
-  control_plane_name: prod-OnCloud
-vaults:
-- config:
-    config_store_id: 2e3326f0-6e90-44bb-9dcf-eeffd9318c7b
-  name: konnect
-  prefix: identity
