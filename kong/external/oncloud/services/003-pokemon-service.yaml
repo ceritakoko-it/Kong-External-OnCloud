@@ -4,7 +4,7 @@ _konnect:
 services:
 - connect_timeout: 60000
   enabled: true
-  host: pokeapi.co
+  host: __POKEMON_SERVICE_HOST__
   name: pokemon-service
   port: 443
   protocol: https
