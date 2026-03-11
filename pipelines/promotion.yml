@@ -181,7 +181,6 @@ stages:
         TS="$(date +%Y%m%d-%H%M%S)"
         CP_SAFE="$(echo "${RESOLVED_CONTROL_PLANE}" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-' '-')"
         CURRENT_BACKUP_FILE="${BACKUP_DIR}/${CP_SAFE}-current-before-sync-${TS}.yaml"
-        DESIRED_BACKUP_FILE="${BACKUP_DIR}/${CP_SAFE}-desired-before-sync-${TS}.yaml"
 
         echo "Backing up current control plane state to: $CURRENT_BACKUP_FILE"
         deck gateway dump \
@@ -191,15 +190,8 @@ stages:
           --output-file "$CURRENT_BACKUP_FILE" \
           --yes
 
-        echo "Backing up desired promoted state to: $DESIRED_BACKUP_FILE"
-        if [ -d "$RESOLVED_TARGET_PATH" ]; then
-          deck file render "$RESOLVED_TARGET_PATH" --output-file "$DESIRED_BACKUP_FILE" --format yaml
-        else
-          cp "$RESOLVED_TARGET_PATH" "$DESIRED_BACKUP_FILE"
-        fi
-
         echo "##vso[task.setvariable variable=BACKUP_DIR]${BACKUP_DIR}"
-      displayName: Backup current and desired state (pre-sync)
+      displayName: Backup current state (pre-sync)
       condition: and(succeeded(), eq(variables['HAS_CHANGES'], 'true'))
       env:
         BACKUP_ROOT: $(Build.ArtifactStagingDirectory)
