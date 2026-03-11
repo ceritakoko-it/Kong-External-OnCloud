@@ -230,7 +230,7 @@ services:
       introspection_post_args_names: null
       introspection_post_args_values: null
       introspection_token_param_name: token
-      issuer: https://4vboyhsix88r649o.sg.identity.konghq.com/auth
+      issuer: __ISSUER_URL__
       issuers_allowed: null
       jwt_session_claim: sid
       jwt_session_cookie: null

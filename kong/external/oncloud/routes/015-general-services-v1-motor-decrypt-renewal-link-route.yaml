@@ -4,7 +4,7 @@ _konnect:
 routes:
 - hosts:
   - __PUBLIC_HOST_PRIMARY__
-  - __PUBLIC_HOST_SECONDARY__
+__OPTIONAL_PUBLIC_HOST_SECONDARY__
   https_redirect_status_code: 426
   methods:
   - POST
