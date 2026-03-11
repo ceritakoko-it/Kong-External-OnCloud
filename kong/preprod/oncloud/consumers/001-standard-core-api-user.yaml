@@ -31,8 +31,7 @@ consumers:
     enabled: false
     name: rate-limiting
     partials:
-    - id: 9541e197-dab6-44b6-b915-9fa84ded895e
-      name: on-cloud-preprod-redis
+    - name: on-cloud-preprod-redis
       path: config.redis
     protocols:
     - grpc

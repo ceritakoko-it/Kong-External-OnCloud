@@ -6,10 +6,12 @@ routes:
   - uat-connect.kaotim.my
   - uat-connect.kaotim.cloud
   https_redirect_status_code: 426
-  name: core-api-motor-1-ereceipt-download-route
+  methods:
+  - GET
+  name: core-api-v2-motor-certificate-details-route
   path_handling: v0
   paths:
-  - /core-api/motor/e-receipt/download
+  - /core-api-2/motor/certificate-details
   plugins:
   - config:
       add:
@@ -33,7 +35,7 @@ routes:
         body: []
         headers: []
         querystring: []
-        uri: /core-api//api/v1/motor/e-receipt/download
+        uri: /core-api/api/v2/motor/certificate-details
     enabled: true
     name: request-transformer
     protocols:
@@ -49,5 +51,9 @@ routes:
   request_buffering: true
   response_buffering: true
   strip_path: true
+  tags:
+  - core-api
+  - v2
+  - motor
   service:
     name: UAT3-Kaotim

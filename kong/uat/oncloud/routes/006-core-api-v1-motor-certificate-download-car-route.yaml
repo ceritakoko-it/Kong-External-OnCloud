@@ -6,10 +6,12 @@ routes:
   - uat-connect.kaotim.my
   - uat-connect.kaotim.cloud
   https_redirect_status_code: 426
-  name: general-services-motor-generate-renewal-link-route
+  methods:
+  - POST
+  name: core-api-v1-motor-certificate-download-car-route
   path_handling: v0
   paths:
-  - /general-services/motor/generate-renewal-link
+  - /core-api/motor/certificates/download-car
   plugins:
   - config:
       add:
@@ -33,7 +35,7 @@ routes:
         body: []
         headers: []
         querystring: []
-        uri: /kaotim-general-services/api/v1/motor/generate-renewal-link
+        uri: /core-api/api/v1/motor/certificates/download-car
     enabled: true
     name: request-transformer
     protocols:
@@ -48,6 +50,10 @@ routes:
   regex_priority: 0
   request_buffering: true
   response_buffering: true
-  strip_path: true
+  strip_path: false
+  tags:
+  - coreApi
+  - v1
+  - motor
   service:
     name: UAT3-Kaotim

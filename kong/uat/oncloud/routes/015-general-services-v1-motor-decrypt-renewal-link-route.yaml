@@ -8,7 +8,7 @@ routes:
   https_redirect_status_code: 426
   methods:
   - POST
-  name: general-services-motor-decrypt-renewal-link-route
+  name: general-services-v1-motor-decrypt-renewal-link-route
   path_handling: v0
   paths:
   - /general-services/motor/decrypt-renewal-link
@@ -87,5 +87,8 @@ routes:
   request_buffering: true
   response_buffering: true
   strip_path: false
+  tags:
+  - generalServices
+  - v1
   service:
     name: UAT3-Kaotim
