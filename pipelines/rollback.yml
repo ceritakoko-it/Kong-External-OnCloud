@@ -129,16 +129,9 @@ stages:
 
     - bash: |
         set -euo pipefail
-        deck gateway validate \
-          --konnect-token "$KONG_TOKEN" \
-          --konnect-addr "$KONG_ADDR" \
-          --konnect-control-plane-name "$RESOLVED_CONTROL_PLANE" \
-          "$RESOLVED_ROLLBACK_FILE"
-      displayName: decK gateway validate (rollback state)
+        deck file validate "$RESOLVED_ROLLBACK_FILE"
+      displayName: decK file validate (rollback state)
       env:
-        KONG_TOKEN: $(KONG_TOKEN)
-        KONG_ADDR: $(KONG_ADDR)
-        RESOLVED_CONTROL_PLANE: $(RESOLVED_CONTROL_PLANE)
         RESOLVED_ROLLBACK_FILE: $(RESOLVED_ROLLBACK_FILE)
 
     - bash: |

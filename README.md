@@ -88,7 +88,7 @@ Shared high-level behavior:
 1. Install decK.
 2. Validate required secrets (`KONG_TOKEN`, `KONG_ADDR`).
 3. Resolve control plane and desired state path.
-4. Ping gateway, validate config, run diff.
+4. Ping gateway, validate config locally, run diff.
 5. If any diff summary count is non-zero (`Created`, `Updated`, `Deleted`), treat as changes.
 6. Backup current state.
 7. Publish backup as pipeline artifact.
@@ -129,7 +129,7 @@ Rollback re-applies backup dump state from a previous run artifact to the select
 1. Validate run rules and ensure `rollbackBuildId` is provided.
 2. Download artifact named `kong-backup-<environment>-<controlPlane>-<rollbackBuildId>`.
 3. Resolve rollback source file using `*-current-before-sync-*.yaml`.
-4. Run `deck gateway ping`, `validate`, and `diff`.
+4. Run `deck gateway ping`, `deck file validate`, and `diff`.
 5. If diff shows changes, execute `deck gateway sync` using the resolved rollback dump file.
 
 ### 6.4. Pipeline Automation with Azure DevOps
@@ -155,7 +155,7 @@ flowchart TD
 
     E --> E1[Install decK + Validate Vars]
     E1 --> E2[Resolve Dev/Uat target path/control plane]
-    E2 --> E3[Ping + Validate + Diff]
+    E2 --> E3[Ping + File Validate + Diff]
     E3 --> E4{Created/Updated/Deleted > 0?}
     E4 -->|No| Z[Finish - No Sync]
     E4 -->|Yes| E5[Backup current]
@@ -171,7 +171,7 @@ flowchart TD
     F3 --> F4
     F31 --> F4
     F4 --> F41[Commit and push target folder if changed]
-    F41 --> F5[Ping + Validate + Diff]
+    F41 --> F5[Ping + File Validate + Diff]
     F5 --> F6{Created/Updated/Deleted > 0?}
     F6 -->|No| Z
     F6 -->|Yes| F7[Backup current]
