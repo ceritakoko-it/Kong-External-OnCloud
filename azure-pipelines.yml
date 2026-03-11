@@ -28,7 +28,11 @@ parameters:
   - OnPremise
   - OnCloud
 - name: rollbackBuildId
-  displayName: Rollback source Build ID
+  displayName: Rollback source Run/Build ID
+  type: string
+  default: 'not-required'
+- name: rollbackBackupFile
+  displayName: Rollback backup YAML filename
   type: string
   default: 'not-required'
 
@@ -113,3 +117,4 @@ stages:
       environment: ${{ parameters.environment }}
       controlPlane: ${{ parameters.controlPlane }}
       rollbackBuildId: ${{ parameters.rollbackBuildId }}
+      rollbackBackupFile: ${{ parameters.rollbackBackupFile }}

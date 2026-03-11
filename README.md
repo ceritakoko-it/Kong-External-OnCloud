@@ -90,7 +90,7 @@ Shared high-level behavior:
 3. Resolve control plane and desired state path.
 4. Ping gateway, validate config, run diff.
 5. If any diff summary count is non-zero (`Created`, `Updated`, `Deleted`), treat as changes.
-6. Backup current and desired state.
+6. Backup current state.
 7. Publish backup as pipeline artifact.
 8. Run `deck gateway sync`.
 
@@ -111,13 +111,10 @@ Backup location on agent:
 
 - `$(Build.ArtifactStagingDirectory)/kong-backup`
 
-Backup files:
+Backup file:
 
 1. Current state dump:
 - `<control-plane>-current-before-sync-<timestamp>.yaml`
-
-2. Desired state snapshot:
-- `<control-plane>-desired-before-sync-<timestamp>.yaml`
 
 Published artifact name:
 
@@ -161,7 +158,7 @@ flowchart TD
     E2 --> E3[Ping + Validate + Diff]
     E3 --> E4{Created/Updated/Deleted > 0?}
     E4 -->|No| Z[Finish - No Sync]
-    E4 -->|Yes| E5[Backup current + desired]
+    E4 -->|Yes| E5[Backup current]
     E5 --> E6[Publish backup artifact]
     E6 --> E7[deck gateway sync]
     E7 --> Z
@@ -177,7 +174,7 @@ flowchart TD
     F41 --> F5[Ping + Validate + Diff]
     F5 --> F6{Created/Updated/Deleted > 0?}
     F6 -->|No| Z
-    F6 -->|Yes| F7[Backup current + desired]
+    F6 -->|Yes| F7[Backup current]
     F7 --> F8[Publish backup artifact]
     F8 --> F9[deck gateway sync]
     F9 --> Z
