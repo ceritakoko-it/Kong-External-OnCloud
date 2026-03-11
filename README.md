@@ -2,7 +2,10 @@
 
 This repository is the source of truth for Kong decK configuration and promotion flow across environments.
 
-For `OnCloud`, the source of truth is now the shared base at `kong/external/oncloud`, rendered with environment files under `kong/env/`.
+For `OnCloud`, the source of truth is:
+
+- shared base: `kong/external/oncloud`
+- environment values: `kong/env/*.env`
 
 ## Naming Conventions
 
@@ -34,6 +37,157 @@ Run via Azure DevOps `Run pipeline` with parameters:
 - `environment`: `Dev`, `Uat`, `PreProd`, `Prod`, `DR`
 - `controlPlane`: `OnCloud` or `OnPremise`
 - `rollbackBuildId`: required when `mode=rollback`, points to the source pipeline `BuildId` that published backup artifact
+- `rollbackBackupFile`: required when `mode=rollback`, exact backup YAML filename inside the published artifact
+
+Azure DevOps also exposes:
+
+- `Branch/tag`
+- `Commit`
+
+If `Commit` is filled, the pipeline explicitly pins checkout to `Build.SourceVersion` and fails if the checked-out commit does not match.
+
+## Azure DevOps Prerequisites
+
+Before running any pipeline, create these variables in Azure DevOps:
+
+- `KONG_TOKEN`
+  - secret
+  - Konnect access token used by decK
+- `KONG_ADDR`
+  - plain text
+  - Konnect API base URL
+  - example: `https://us.api.konghq.com`
+
+Recommended:
+
+- store them in a variable group
+- link that variable group to this pipeline
+
+Without these values, deployment, promotion, and rollback will fail in the `Validate required variables` step.
+
+## Environment Setup
+
+For `OnCloud`, each environment must have a matching env file under `kong/env/`.
+
+Current files:
+
+- `kong/env/dev-oncloud.env`
+- `kong/env/uat-oncloud.env`
+- `kong/env/preprod-oncloud.env`
+- `kong/env/prod-oncloud.env`
+- `kong/env/dr-oncloud.env`
+
+Each env file contains the values used to render the shared base.
+
+Values that usually must be reviewed per environment:
+
+- `CONTROL_PLANE_NAME`
+- `PUBLIC_HOST_PRIMARY`
+- `PUBLIC_HOST_SECONDARY`
+- `GET_TOKEN_SERVICE_NAME`
+- `GET_TOKEN_SERVICE_HOST`
+- `ISSUER_URL`
+- `KAOTIM_SERVICE_HOST`
+- `POKEMON_SERVICE_HOST`
+- `REDIS_PARTIAL_NAME`
+- `REDIS_CACHE_PARTIAL_NAME`
+- `VAULT_CONFIG_STORE_ID`
+
+### First-Time Setup For Uat / PreProd / Prod / DR
+
+Before first deployment to a new environment, make sure these dependencies already exist in Konnect for that target environment:
+
+1. Identity issuer / identity domain
+- example:
+  - `Dev-OnCloud` -> `https://<dev-identity-domain>.sg.identity.konghq.com/auth`
+  - `Uat-OnCloud` -> `https://<uat-identity-domain>.sg.identity.konghq.com/auth`
+  - `Prod-OnCloud` -> `https://<prod-identity-domain>.sg.identity.konghq.com/auth`
+- update both:
+  - `ISSUER_URL`
+  - `GET_TOKEN_SERVICE_HOST`
+
+2. Vault `konnect` with prefix `identity`
+- create the vault in the target control plane if it does not exist yet
+- after creating it, get the JSON and copy:
+  - `config.config_store_id`
+- put that value into:
+  - `VAULT_CONFIG_STORE_ID`
+
+Important:
+
+- do not use the top-level vault `id`
+- use only `config.config_store_id`
+
+Example:
+
+If Konnect returns:
+
+```json
+{
+  "config": {
+    "config_store_id": "<config-store-id>"
+  },
+  "id": "<vault-id>",
+  "name": "konnect",
+  "prefix": "identity"
+}
+```
+
+Then the env file must contain:
+
+```env
+VAULT_CONFIG_STORE_ID=<config-store-id>
+```
+
+Not:
+
+```env
+VAULT_CONFIG_STORE_ID=<vault-id>
+```
+
+3. Review route hostnames for the target environment
+- set:
+  - `PUBLIC_HOST_PRIMARY`
+  - `PUBLIC_HOST_SECONDARY`
+- `PUBLIC_HOST_SECONDARY` may be left blank
+
+4. Review any environment-specific upstream values
+- `KAOTIM_SERVICE_HOST`
+- `POKEMON_SERVICE_HOST`
+- `REDIS_PARTIAL_NAME`
+- `REDIS_CACHE_PARTIAL_NAME`
+
+### Parameter Checklist By Environment
+
+Before first run for each environment, verify:
+
+`Dev-OnCloud`
+- `CONTROL_PLANE_NAME=Dev-OnCloud`
+- `GET_TOKEN_SERVICE_HOST=<dev-identity-domain>.sg.identity.konghq.com`
+- `ISSUER_URL=https://<dev-identity-domain>.sg.identity.konghq.com/auth`
+- `VAULT_CONFIG_STORE_ID` matches the Dev config store
+
+`Uat-OnCloud`
+- `CONTROL_PLANE_NAME=Uat-OnCloud`
+- `GET_TOKEN_SERVICE_HOST=<uat-identity-domain>.sg.identity.konghq.com`
+- `ISSUER_URL=https://<uat-identity-domain>.sg.identity.konghq.com/auth`
+- `VAULT_CONFIG_STORE_ID` matches the UAT config store
+
+`PreProd-OnCloud`
+- `CONTROL_PLANE_NAME=PreProd-OnCloud`
+- set the real PreProd identity host and issuer before first run
+- set the real PreProd `VAULT_CONFIG_STORE_ID` before first run
+
+`Prod-OnCloud`
+- `CONTROL_PLANE_NAME=Prod-OnCloud`
+- `GET_TOKEN_SERVICE_HOST=<prod-identity-domain>.sg.identity.konghq.com`
+- `ISSUER_URL=https://<prod-identity-domain>.sg.identity.konghq.com/auth`
+- `VAULT_CONFIG_STORE_ID` matches the Prod config store
+
+`DR-OnCloud`
+- `CONTROL_PLANE_NAME=DR-OnCloud`
+- set the real DR identity host and issuer before first run
+- set the real DR `VAULT_CONFIG_STORE_ID` before first run
 
 ## Governance Rules (Enforced)
 
@@ -87,14 +241,16 @@ Any other combination fails in the guard stage.
 
 Shared high-level behavior:
 
-1. Install decK.
-2. Validate required secrets (`KONG_TOKEN`, `KONG_ADDR`).
-3. Resolve control plane and desired state path.
-4. Ping gateway, validate config locally, run diff.
-5. If any diff summary count is non-zero (`Created`, `Updated`, `Deleted`), treat as changes.
-6. Backup current state.
-7. Publish backup as pipeline artifact.
-8. Run `deck gateway sync`.
+1. Checkout repository and pin to the selected commit ID.
+2. Install decK.
+3. Validate required secrets (`KONG_TOKEN`, `KONG_ADDR`).
+4. Resolve control plane and desired state path.
+5. Render shared `OnCloud` state when applicable.
+6. Ping gateway, validate config locally, run diff.
+7. If any diff summary count is non-zero (`Created`, `Updated`, `Deleted`), treat as changes.
+8. Backup current state.
+9. Publish backup as pipeline artifact.
+10. Run `deck gateway sync`.
 
 OnCloud repository behavior:
 
@@ -106,7 +262,27 @@ OnCloud repository behavior:
 - `kong/env/prod-oncloud.env`
 - `kong/env/dr-oncloud.env`
 3. The pipeline renders the shared base into a temporary folder and deploys that rendered output.
-4. Existing `kong/<env>/oncloud` folders can remain in the repo during transition, but the pipeline prefers the shared base when it exists.
+4. `kong/<env>/oncloud` folders are no longer used for `OnCloud`.
+
+Environment files currently parameterize:
+
+- `CONTROL_PLANE_NAME`
+- `PUBLIC_HOST_PRIMARY`
+- `PUBLIC_HOST_SECONDARY` (optional)
+- `GET_TOKEN_SERVICE_NAME`
+- `GET_TOKEN_SERVICE_HOST`
+- `ISSUER_URL`
+- `KAOTIM_SERVICE_HOST`
+- `POKEMON_SERVICE_HOST`
+- `REDIS_PARTIAL_NAME`
+- `REDIS_CACHE_PARTIAL_NAME`
+- `VAULT_CONFIG_STORE_ID`
+
+Notes:
+
+- `PUBLIC_HOST_PRIMARY` is required.
+- `PUBLIC_HOST_SECONDARY` is optional. If blank, the renderer removes the second `hosts` entry so route YAML stays valid.
+- `VAULT_CONFIG_STORE_ID` must match the live config store binding intended for that environment. Changing it on an already-used vault may fail due to Konnect reference constraints.
 
 Promotion-specific repository behavior:
 
@@ -136,11 +312,14 @@ Note: backup files are not committed to this repo; they are available in Azure D
 
 Rollback re-applies backup dump state from a previous run artifact to the selected target control plane.
 
-1. Validate run rules and ensure `rollbackBuildId` is provided.
+1. Validate run rules and ensure `rollbackBuildId` and `rollbackBackupFile` are provided.
 2. Download artifact named `kong-backup-<environment>-<controlPlane>-<rollbackBuildId>`.
 3. Resolve rollback source file using the exact `rollbackBackupFile` parameter value.
-4. Run `deck gateway ping`, `deck file validate`, and `diff`.
-5. If diff shows changes, execute `deck gateway sync` using the resolved rollback dump file.
+4. Validate rollback alignment:
+- artifact directory must match the selected `environment`, `controlPlane`, and `rollbackBuildId`
+- rollback YAML `control_plane_name` must exactly match the selected target control plane
+5. Run `deck gateway ping`, `deck file validate`, and `diff`.
+6. If diff shows changes, execute `deck gateway sync` using the resolved rollback dump file.
 
 ### 6.4. Pipeline Automation with Azure DevOps
 
@@ -163,7 +342,8 @@ flowchart TD
     D -->|deployment| E[Deploy Stage]
     D -->|promotion| F[Promote Stage]
 
-    E --> E1[Install decK + Validate Vars]
+    E --> E0[Checkout + Pin Commit]
+    E0 --> E1[Install decK + Validate Vars]
     E1 --> E2[Resolve target path, env file, control plane]
     E2 --> E21[Render shared OnCloud state when available]
     E21 --> E3[Ping + File Validate + Diff]
@@ -175,7 +355,8 @@ flowchart TD
     E7 --> Z
 
     F --> F1{environment}
-    F1 -->|PreProd/Prod/DR| F4[Resolve target env file and render shared OnCloud state]
+    F1 -->|PreProd/Prod/DR| F2[Checkout + Pin Commit]
+    F2 --> F4[Resolve target env file and render shared OnCloud state]
     F4 --> F5[Ping + File Validate + Diff]
     F5 --> F6{Created/Updated/Deleted > 0?}
     F6 -->|No| Z
