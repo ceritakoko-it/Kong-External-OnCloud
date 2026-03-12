@@ -25,7 +25,6 @@ parameters:
   type: string
   default: OnCloud
   values:
-  - OnPremise
   - OnCloud
 - name: rollbackBuildId
   displayName: Rollback source Run/Build ID

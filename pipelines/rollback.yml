@@ -77,14 +77,11 @@ stages:
         TARGET_ENV="${{ parameters.environment }}"
         SELECTED_CP="${{ parameters.controlPlane }}"
 
-        if [ "$SELECTED_CP" = "OnPremise" ] || [ "$SELECTED_CP" = "onprem" ] || [ "$SELECTED_CP" = "OnPrem" ]; then
-          CONTROL_PLANE_TARGET="${TARGET_ENV}-OnPremise"
-          ARTIFACT_CP="OnPremise"
-        elif [ "$SELECTED_CP" = "OnCloud" ] || [ "$SELECTED_CP" = "oncloud" ]; then
+        if [ "$SELECTED_CP" = "OnCloud" ] || [ "$SELECTED_CP" = "oncloud" ]; then
           CONTROL_PLANE_TARGET="${TARGET_ENV}-OnCloud"
           ARTIFACT_CP="OnCloud"
         else
-          echo "Unsupported controlPlane parameter: ${SELECTED_CP}"
+          echo "Unsupported controlPlane parameter: ${SELECTED_CP}. Only OnCloud is supported."
           exit 1
         fi
 

@@ -41,7 +41,7 @@ Run via Azure DevOps `Run pipeline` with parameters:
 
 - `mode`: `deployment` or `promotion` or `rollback`
 - `environment`: `Dev`, `Uat`, `PreProd`, `Prod`, `DR`
-- `controlPlane`: `OnCloud` or `OnPremise`
+- `controlPlane`: `OnCloud`
 - `rollbackBuildId`: required when `mode=rollback`, points to the source pipeline `BuildId` that published backup artifact
 - `rollbackBackupFile`: required when `mode=rollback`, exact backup YAML filename inside the published artifact
 
