@@ -2,7 +2,7 @@ _format_version: "3.0"
 _konnect:
   control_plane_name: __CONTROL_PLANE_NAME__
 consumers:
-- custom_id: dezi8ouoh4lnl0j6
+- custom_id: __STANDARD_CORE_API_USER_CUSTOM_ID__
   groups:
   - name: Core_API_Group
   jwt_secrets:

@@ -144,7 +144,14 @@ Consumer checks:
 
 - use a stable username that reflects the calling application or partner
 - use `custom_id` only when you need a stable external identifier
+- parameterize `custom_id` in `kong/env/*.env` when the value differs by environment
+- use a clear env naming pattern, for example `<CONSUMER_NAME>_CUSTOM_ID`
 - if authentication credentials are needed, create the related credential object in the appropriate Kong config after the consumer is defined
+
+Example mapping:
+
+- consumer `standard_core_api_user` -> `STANDARD_CORE_API_USER_CUSTOM_ID`
+- consumer `standard_general_services_user` -> `STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID`
 
 Example outcome:
 
@@ -165,7 +172,14 @@ Use env variables for values such as:
 - upstream host names
 - public host names
 - issuer URLs
+- consumer `custom_id` values
 - vault or partial references
+
+Example env variables:
+
+- `AIR_FLIGHT_SERVICE_HOST`
+- `AIR_FLIGHT_PUBLIC_HOST`
+- `AIR_FLIGHT_CONSUMER_CUSTOM_ID`
 
 If you add a new placeholder token to the shared `kong/external/oncloud` files, also update:
 
