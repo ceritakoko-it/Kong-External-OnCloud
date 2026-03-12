@@ -94,10 +94,16 @@ Values that usually must be reviewed per environment:
 - `GET_TOKEN_SERVICE_HOST`
 - `ISSUER_URL`
 - `KAOTIM_SERVICE_HOST`
-- `POKEMON_SERVICE_HOST`
+- `STANDARD_CORE_API_USER_CUSTOM_ID`
+- `STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID`
 - `REDIS_PARTIAL_NAME`
 - `REDIS_CACHE_PARTIAL_NAME`
 - `VAULT_CONFIG_STORE_ID`
+
+Consumer `custom_id` mapping:
+
+- `STANDARD_CORE_API_USER_CUSTOM_ID` -> consumer `standard_core_api_user`
+- `STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID` -> consumer `standard_general_services_user`
 
 ### First-Time Setup For Uat / PreProd / Prod / DR
 
@@ -159,9 +165,17 @@ VAULT_CONFIG_STORE_ID=<vault-id>
 
 4. Review any environment-specific upstream values
 - `KAOTIM_SERVICE_HOST`
-- `POKEMON_SERVICE_HOST`
 - `REDIS_PARTIAL_NAME`
 - `REDIS_CACHE_PARTIAL_NAME`
+
+5. Review any environment-specific consumer identifiers
+- `STANDARD_CORE_API_USER_CUSTOM_ID`
+- `STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID`
+
+These values map to:
+
+- `CoreAPI` -> `STANDARD_CORE_API_USER_CUSTOM_ID`
+- `GeneralServices` -> `STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID`
 
 ### Parameter Checklist By Environment
 
@@ -177,6 +191,8 @@ Before first run for each environment, verify:
 - `CONTROL_PLANE_NAME=Uat-OnCloud`
 - `GET_TOKEN_SERVICE_HOST=<uat-identity-domain>.sg.identity.konghq.com`
 - `ISSUER_URL=https://<uat-identity-domain>.sg.identity.konghq.com/auth`
+- `STANDARD_CORE_API_USER_CUSTOM_ID=wchk88gpachhwr34`
+- `STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID=yz955goaapqvdt3r`
 - `VAULT_CONFIG_STORE_ID` matches the UAT config store
 
 `PreProd-OnCloud`
@@ -188,6 +204,8 @@ Before first run for each environment, verify:
 - `CONTROL_PLANE_NAME=Prod-OnCloud`
 - `GET_TOKEN_SERVICE_HOST=<prod-identity-domain>.sg.identity.konghq.com`
 - `ISSUER_URL=https://<prod-identity-domain>.sg.identity.konghq.com/auth`
+- `STANDARD_CORE_API_USER_CUSTOM_ID=7fkajd8uqyeagaxz`
+- `STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID=84dunjlkr2lue0ul`
 - `VAULT_CONFIG_STORE_ID` matches the Prod config store
 
 `DR-OnCloud`
@@ -279,7 +297,8 @@ Environment files currently parameterize:
 - `GET_TOKEN_SERVICE_HOST`
 - `ISSUER_URL`
 - `KAOTIM_SERVICE_HOST`
-- `POKEMON_SERVICE_HOST`
+- `STANDARD_CORE_API_USER_CUSTOM_ID`
+- `STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID`
 - `REDIS_PARTIAL_NAME`
 - `REDIS_CACHE_PARTIAL_NAME`
 - `VAULT_CONFIG_STORE_ID`
@@ -288,6 +307,7 @@ Notes:
 
 - `PUBLIC_HOST_PRIMARY` is required.
 - `PUBLIC_HOST_SECONDARY` is optional. If blank, the renderer removes the second `hosts` entry so route YAML stays valid.
+- `STANDARD_CORE_API_USER_CUSTOM_ID` and `STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID` should be set per environment if Konnect consumer IDs differ between control planes.
 - `VAULT_CONFIG_STORE_ID` must match the live config store binding intended for that environment. Changing it on an already-used vault may fail due to Konnect reference constraints.
 
 Promotion-specific repository behavior:

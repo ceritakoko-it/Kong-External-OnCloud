@@ -2,7 +2,7 @@ _format_version: "3.0"
 _konnect:
   control_plane_name: __CONTROL_PLANE_NAME__
 consumers:
-- custom_id: l3f3ed8rxuvba8k6
+- custom_id: __STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID__
   groups:
   - name: General_Services_Group
   plugins:
