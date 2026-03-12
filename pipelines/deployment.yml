@@ -56,15 +56,7 @@ stages:
         ENV_LOWER="$(echo "$SELECTED_ENV" | tr '[:upper:]' '[:lower:]')"
         CP_LOWER="$(echo "$SELECTED_CP" | tr '[:upper:]' '[:lower:]')"
 
-        if [ "$CP_LOWER" = "onpremise" ] || [ "$CP_LOWER" = "onprem" ]; then
-          CONTROL_PLANE="${SELECTED_ENV}-OnPremise"
-          DUMP_FILE="kong-${ENV_LOWER}-onprem.yaml"
-          MODULE_DIR="kong/${ENV_LOWER}/onprem"
-          TEMPLATE_DIR=""
-          ENV_FILE=""
-          TARGET_PATH="$MODULE_DIR"
-          USE_RENDERED_STATE="false"
-        elif [ "$CP_LOWER" = "oncloud" ] && [ -d "kong/external/oncloud" ]; then
+        if [ "$CP_LOWER" = "oncloud" ] && [ -d "kong/external/oncloud" ]; then
           DUMP_FILE="kong-${ENV_LOWER}-oncloud.yaml"
           TEMPLATE_DIR="kong/external/oncloud"
           ENV_FILE="kong/env/${ENV_LOWER}-oncloud.env"
@@ -87,7 +79,7 @@ stages:
           TARGET_PATH="$MODULE_DIR"
           USE_RENDERED_STATE="false"
         else
-          echo "Unsupported controlPlane parameter: ${SELECTED_CP}"
+          echo "Unsupported controlPlane parameter: ${SELECTED_CP}. Only OnCloud is supported."
           exit 1
         fi
 

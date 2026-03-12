@@ -67,13 +67,10 @@ stages:
             ;;
         esac
 
-        if [ "$CP_LOWER" = "onpremise" ] || [ "$CP_LOWER" = "onprem" ]; then
-          CP_SEGMENT="onprem"
-          CONTROL_PLANE_TARGET="${TARGET_ENV}-OnPremise"
-        elif [ "$CP_LOWER" = "oncloud" ]; then
+        if [ "$CP_LOWER" = "oncloud" ]; then
           CP_SEGMENT="oncloud"
         else
-          echo "Unsupported controlPlane parameter: ${SELECTED_CP}"
+          echo "Unsupported controlPlane parameter: ${SELECTED_CP}. Only OnCloud is supported."
           exit 1
         fi
 
