@@ -1,5 +1,0 @@
-_format_version: "3.0"
-_konnect:
-  control_plane_name: __CONTROL_PLANE_NAME__
-consumers:
-- username: naluri-dev
