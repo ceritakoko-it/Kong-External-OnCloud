@@ -438,6 +438,18 @@ services:
   host: 4vboyhsix88r649o.sg.identity.konghq.com
   name: Dev-OnCloud-Get-Token
   path: /auth/oauth/token
+  plugins:
+  - config:
+      custom_fields_by_lua: {}
+      path: /usr/local/kong/logs/transaction.log
+      reopen: false
+    enabled: true
+    name: file-log
+    protocols:
+    - grpc
+    - grpcs
+    - http
+    - https
   port: 443
   protocol: https
   read_timeout: 60000
@@ -445,6 +457,7 @@ services:
   routes:
   - hosts:
     - dev-connect.kaotim.my
+    - dev-connect.kaotim.cloud
     https_redirect_status_code: 426
     name: OIDC-Get-Token
     path_handling: v0
@@ -519,6 +532,17 @@ services:
       handle_unknown: true
     enabled: true
     name: exit-transformer
+    protocols:
+    - grpc
+    - grpcs
+    - http
+    - https
+  - config:
+      custom_fields_by_lua: {}
+      path: /usr/local/kong/logs/transaction.log
+      reopen: false
+    enabled: true
+    name: file-log
     protocols:
     - grpc
     - grpcs
@@ -1571,6 +1595,18 @@ services:
   enabled: true
   host: pokeapi.co
   name: pokemon-service
+  plugins:
+  - config:
+      custom_fields_by_lua: {}
+      path: /usr/local/kong/logs/transaction.log
+      reopen: false
+    enabled: true
+    name: file-log
+    protocols:
+    - grpc
+    - grpcs
+    - http
+    - https
   port: 443
   protocol: https
   read_timeout: 60000

@@ -1,0 +1,23 @@
+_format_version: "3.0"
+_konnect:
+  control_plane_name: __CONTROL_PLANE_NAME__
+routes:
+- hosts:
+  - __PUBLIC_HOST_PRIMARY__
+  https_redirect_status_code: 426
+  methods:
+  - GET
+  name: air-flight-search-route
+  path_handling: v0
+  paths:
+  - /api/air-flight/search
+  preserve_host: false
+  protocols:
+  - http
+  - https
+  regex_priority: 0
+  request_buffering: true
+  response_buffering: true
+  strip_path: false
+  service:
+    name: air-flight-service
