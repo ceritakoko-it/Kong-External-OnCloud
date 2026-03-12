@@ -7,6 +7,12 @@ For `OnCloud`, the source of truth is:
 - shared base: `kong/external/oncloud`
 - environment values: `kong/env/*.env`
 
+Reusable onboarding samples live outside the deployable tree:
+
+- `templates/oncloud-air-flight`
+
+That folder is documentation/template material only. It is intentionally outside `kong/` so the current validation and deployment pipeline does not treat it as live decK state.
+
 ## Naming Conventions
 
 | Component | Naming Convention | Sample |
