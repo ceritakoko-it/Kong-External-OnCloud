@@ -7,7 +7,7 @@
 stages:
 - stage: Promote_To_${{ parameters.environment }}_${{ parameters.controlPlane }}
   displayName: Promote to ${{ parameters.environment }} - ${{ parameters.controlPlane }}
-  condition: "and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), or(eq('${{ parameters.environment }}', 'PreProd'), eq('${{ parameters.environment }}', 'Prod'), eq('${{ parameters.environment }}', 'DR')))"
+  condition: "and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), or(eq('${{ parameters.environment }}', 'Uat'), eq('${{ parameters.environment }}', 'PreProd'), eq('${{ parameters.environment }}', 'Prod'), eq('${{ parameters.environment }}', 'DR')))"
   jobs:
   - job: Promote
     displayName: Promote modular state
@@ -58,11 +58,12 @@ stages:
         CP_LOWER="$(echo "$SELECTED_CP" | tr '[:upper:]' '[:lower:]')"
 
         case "$TARGET_ENV_LOWER" in
+          uat) SOURCE_ENV="Dev"; SOURCE_ENV_LOWER="dev" ;;
           preprod) SOURCE_ENV="Uat"; SOURCE_ENV_LOWER="uat" ;;
           prod) SOURCE_ENV="PreProd"; SOURCE_ENV_LOWER="preprod" ;;
           dr) SOURCE_ENV="Prod"; SOURCE_ENV_LOWER="prod" ;;
           *)
-            echo "Promotion target must be PreProd, Prod, or DR. Received: ${TARGET_ENV}"
+            echo "Promotion target must be Uat, PreProd, Prod, or DR. Received: ${TARGET_ENV}"
             exit 1
             ;;
         esac

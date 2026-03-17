@@ -19,7 +19,7 @@ consumers:
       hide_client_headers: false
       hour: null
       limit_by: consumer
-      minute: 100
+      minute: 1
       month: null
       path: null
       policy: redis
@@ -28,10 +28,11 @@ consumers:
       second: null
       sync_rate: -1
       year: null
-    enabled: false
+    enabled: true
     name: rate-limiting
     partials:
-    - name: __REDIS_PARTIAL_NAME__
+    - id: 9541e197-dab6-44b6-b915-9fa84ded895e
+      name: __REDIS_PARTIAL_NAME__
       path: config.redis
     protocols:
     - grpc

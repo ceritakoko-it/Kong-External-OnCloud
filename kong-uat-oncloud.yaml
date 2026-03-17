@@ -1,6 +1,6 @@
 _format_version: "3.0"
 _konnect:
-  control_plane_name: Dev-OnCloud
+  control_plane_name: Uat-OnCloud
 certificates:
 - cert: |-
     -----BEGIN CERTIFICATE-----
@@ -234,7 +234,7 @@ consumer_groups:
 - name: Core_API_Group
 - name: General_Services_Group
 consumers:
-- custom_id: dezi8ouoh4lnl0j6
+- custom_id: wchk88gpachhwr34
   groups:
   - name: Core_API_Group
   jwt_secrets:
@@ -251,7 +251,7 @@ consumers:
       hide_client_headers: false
       hour: null
       limit_by: consumer
-      minute: 1
+      minute: 100
       month: null
       path: null
       policy: redis
@@ -260,11 +260,11 @@ consumers:
       second: null
       sync_rate: -1
       year: null
-    enabled: true
+    enabled: false
     name: rate-limiting
     partials:
-    - id: 9541e197-dab6-44b6-b915-9fa84ded895e
-      name: on-cloud-dev-redis
+    - id: 2baa40bf-686b-484f-93b4-724330b26bf8
+      name: on-cloud-uat-redis
       path: config.redis
     protocols:
     - grpc
@@ -272,7 +272,7 @@ consumers:
     - http
     - https
   username: standard_core_api_user
-- custom_id: l3f3ed8rxuvba8k6
+- custom_id: yz955goaapqvdt3r
   groups:
   - name: General_Services_Group
   plugins:
@@ -285,7 +285,7 @@ consumers:
       hide_client_headers: false
       hour: null
       limit_by: consumer
-      minute: 1
+      minute: 100
       month: null
       path: null
       policy: redis
@@ -297,8 +297,8 @@ consumers:
     enabled: true
     name: rate-limiting
     partials:
-    - id: 9541e197-dab6-44b6-b915-9fa84ded895e
-      name: on-cloud-dev-redis
+    - id: 2baa40bf-686b-484f-93b4-724330b26bf8
+      name: on-cloud-uat-redis
       path: config.redis
     protocols:
     - grpc
@@ -336,7 +336,7 @@ partials:
 - config:
     cloud_authentication: null
     database: 0
-    host: 10.8.2.68
+    host: 10.8.3.70
     password: '{vault://identity/redis-cache-password}'
     port: 6379
     server_name: null
@@ -344,8 +344,8 @@ partials:
     ssl_verify: false
     timeout: 2000
     username: null
-  id: 9541e197-dab6-44b6-b915-9fa84ded895e
-  name: on-cloud-dev-redis
+  id: 2baa40bf-686b-484f-93b4-724330b26bf8
+  name: on-cloud-uat-redis
   type: redis-ce
 - config:
     cloud_authentication: null
@@ -354,7 +354,7 @@ partials:
     connect_timeout: 2000
     connection_is_proxied: false
     database: 0
-    host: 10.8.2.68
+    host: 10.8.3.70
     keepalive_backlog: 0
     keepalive_pool_size: 256
     password: '{vault://identity/redis-cache-password}'
@@ -371,22 +371,8 @@ partials:
     ssl_verify: false
     username: null
   id: 3c5ba52d-ad6c-4027-a92b-24121026097e
-  name: on-cloud-dev-redis-cache
+  name: on-cloud-uat-redis-cache
   type: redis-ee
-- config:
-    cloud_authentication: null
-    database: 0
-    host: 47.236.55.30
-    password: izenotes@123
-    port: 6379
-    server_name: null
-    ssl: false
-    ssl_verify: false
-    timeout: 2000
-    username: null
-  id: b1bf963b-05df-4965-a3a9-a1006f94a45f
-  name: test-izeno-redis
-  type: redis-ce
 plugins:
 - config:
     allow_origin_absent: true
@@ -457,44 +443,6 @@ plugins:
 services:
 - connect_timeout: 60000
   enabled: true
-  host: 4vboyhsix88r649o.sg.identity.konghq.com
-  name: Dev-OnCloud-Get-Token
-  path: /auth/oauth/token
-  plugins:
-  - config:
-      custom_fields_by_lua: {}
-      path: /usr/local/kong/logs/transaction.log
-      reopen: false
-    enabled: true
-    name: file-log
-    protocols:
-    - grpc
-    - grpcs
-    - http
-    - https
-  port: 443
-  protocol: https
-  read_timeout: 60000
-  retries: 5
-  routes:
-  - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
-    https_redirect_status_code: 426
-    name: OIDC-Get-Token
-    path_handling: v0
-    paths:
-    - /api/token
-    preserve_host: false
-    protocols:
-    - https
-    regex_priority: 0
-    request_buffering: true
-    response_buffering: true
-    strip_path: true
-  write_timeout: 60000
-- connect_timeout: 60000
-  enabled: true
   host: uat3-apigw.kaotim.my
   name: UAT3-Kaotim
   plugins:
@@ -502,54 +450,50 @@ services:
       functions:
       - |-
         return function(status, body, headers)
-            if type(body) ~= "table" then
-                body = {}
-            end
+            body = body or {}
 
-            if headers == nil then
-                headers = {}
-            end
+            local is_kong_id = headers["x-kong-request-id"] or headers["X-Kong-Request-ID"]
+            local auth_header = headers["www-authenticate"] or headers["WWW-Authenticate"] or ""
+            local is_oidc_error = string.find(auth_header, "konghq.com") ~= nil
 
-            if status == 400 then
-                body.internal_code = 8400
-                body.error_type = "API_INVALID_REQUEST"
-                body.message = "Invalid request parameters"
-            elseif status == 401 then
-                body.internal_code = 8401
-                body.error_type = "API_UNAUTHORIZED"
-                body.message = "Authentication failed"
-            elseif status == 403 then
-                body.internal_code = 8403
-                body.error_type = "API_FORBIDDEN"
-                body.message = "Insufficient permissions"
-            elseif status == 404 then
-                body.internal_code = 8404
-                body.error_type = "API_NOT_FOUND"
-                body.message = "Resource not found"
-            elseif status == 409 then
-                body.internal_code = 8409
-                body.error_type = "API_DUPLICATE_REQUEST"
-                body.message = "Duplicate idempotency key"
-            elseif status == 422 then
-                body.internal_code = 8422
-                body.error_type = "API_VALIDATION_ERROR"
-                body.message = "Validation failed"
-            elseif status == 429 then
-                body.internal_code = 8429
-                body.error_type = "API_RATE_LIMIT_EXCEEDED"
-                body.message = "Too many requests"
-            elseif status == 500 then
-                body.internal_code = 8500
-                body.error_type = "API_INTERNAL_ERROR"
-                body.message = "Internal server error"
-            elseif status == 503 then
-                body.internal_code = 8503
-                body.error_type = "API_SERVICE_UNAVAILABLE"
-                body.message = "Service temporarily unavailable"
-            elseif status == 504 then
-                body.internal_code = 8504
-                body.error_type = "API_GATEWAY_TIMEOUT"
-                body.message = "The upstream server is timing out"
+            if is_kong_id or is_oidc_error then
+                if status == 400 then
+                    body.internal_code = 8400
+                    body.error_type = "API_INVALID_REQUEST"
+                    body.message = "Invalid request parameters"
+                elseif status == 401 then
+                    body.internal_code = 8401
+                    body.error_type = "API_UNAUTHORIZED"
+                    body.message = "Authentication failed"
+                elseif status == 403 then
+                    body.internal_code = 8403
+                    body.error_type = "API_FORBIDDEN"
+                    body.message = "Insufficient permissions"
+                elseif status == 404 then
+                    body.internal_code = 8404
+                    body.error_type = "API_NOT_FOUND"
+                    body.message = "Resource not found"
+                elseif status == 409 then
+                    body.internal_code = 8409
+                    body.error_type = "API_DUPLICATE_REQUEST"
+                    body.message = "Duplicate idempotency key"
+                elseif status == 422 then
+                    body.internal_code = 8422
+                    body.error_type = "API_VALIDATION_ERROR"
+                    body.message = "Validation failed"
+                elseif status == 429 then
+                    body.internal_code = 8429
+                    body.error_type = "API_RATE_LIMIT_EXCEEDED"
+                    body.message = "Too many requests"
+                elseif status == 500 then
+                    body.internal_code = 8500
+                    body.error_type = "API_INTERNAL_ERROR"
+                    body.message = "Internal server error"
+                elseif status == 503 then
+                    body.internal_code = 8503
+                    body.error_type = "API_SERVICE_UNAVAILABLE"
+                    body.message = "Service temporarily unavailable"
+                end
             end
 
             return status, body, headers
@@ -557,7 +501,6 @@ services:
       handle_unexpected: true
       handle_unknown: true
     enabled: true
-    instance_name: Global-Error-Handling
     name: exit-transformer
     protocols:
     - grpc
@@ -577,10 +520,9 @@ services:
     - https
   - config:
       anonymous: null
-      audience:
-      - dev-oncloud
+      audience: null
       audience_claim:
-      - dev-oncloud
+      - aud
       audience_required: null
       auth_methods:
       - password
@@ -630,11 +572,11 @@ services:
       - body
       client_id:
       - '{vault://identity/client_id_core_api}'
-      - '{vault://identity/client_id_general_services}'
+      - '{vault://identity/naluri-dev-client-id}'
       client_jwk: null
       client_secret:
       - '{vault://identity/client_secret_core_api}'
-      - '{vault://identity/client_secret_general_services}'
+      - '{vault://identity/naluri-dev-secret-key}'
       cluster_cache_redis:
         cloud_authentication:
           auth_provider: null
@@ -675,9 +617,9 @@ services:
         username: null
       cluster_cache_strategy: "off"
       consumer_by:
+      - username
       - custom_id
-      consumer_claim:
-      - sub
+      consumer_claim: null
       consumer_groups_claim: null
       consumer_groups_optional: false
       consumer_optional: false
@@ -738,7 +680,7 @@ services:
       introspection_post_args_names: null
       introspection_post_args_values: null
       introspection_token_param_name: token
-      issuer: https://4vboyhsix88r649o.sg.identity.konghq.com/auth
+      issuer: https://ct45ecj9xgdgt1fm.sg.identity.konghq.com/auth
       issuers_allowed: null
       jwt_session_claim: sid
       jwt_session_cookie: null
@@ -978,8 +920,8 @@ services:
   retries: 5
   routes:
   - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
+    - uat-connect.kaotim.my
+    - uat-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - POST
@@ -988,43 +930,6 @@ services:
     paths:
     - /core-api/family/download
     plugins:
-    - config:
-        bypass_on_err: false
-        cache_control: false
-        cache_ttl: 300
-        content_type:
-        - text/plain
-        - application/json
-        ignore_uri_case: false
-        memory:
-          dictionary_name: kong_db_cache
-        request_method:
-        - GET
-        - HEAD
-        response_code:
-        - 200
-        - 301
-        - 404
-        response_headers:
-          X-Cache-Key: true
-          X-Cache-Status: true
-          age: true
-        storage_ttl: null
-        strategy: redis
-        vary_headers: null
-        vary_query_params: null
-      enabled: true
-      instance_name: CoreApiV1-Family-Certificate-Details-Cache
-      name: proxy-cache-advanced
-      partials:
-      - id: 3c5ba52d-ad6c-4027-a92b-24121026097e
-        name: on-cloud-dev-redis-cache
-        path: config.redis
-      protocols:
-      - grpc
-      - grpcs
-      - http
-      - https
     - config:
         add:
           body: []
@@ -1068,8 +973,8 @@ services:
     - v1
     - family
   - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
+    - uat-connect.kaotim.my
+    - uat-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - GET
@@ -1090,8 +995,8 @@ services:
     - v1
     - family
   - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
+    - uat-connect.kaotim.my
+    - uat-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - GET
@@ -1112,8 +1017,8 @@ services:
     - v1
     - family
   - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
+    - uat-connect.kaotim.my
+    - uat-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - GET
@@ -1134,8 +1039,8 @@ services:
     - v1
     - kaotim
   - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
+    - uat-connect.kaotim.my
+    - uat-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - POST
@@ -1187,8 +1092,8 @@ services:
     - v1
     - motor
   - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
+    - uat-connect.kaotim.my
+    - uat-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - POST
@@ -1240,8 +1145,8 @@ services:
     - v1
     - motor
   - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
+    - uat-connect.kaotim.my
+    - uat-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - GET
@@ -1262,8 +1167,8 @@ services:
     - v1
     - motor
   - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
+    - uat-connect.kaotim.my
+    - uat-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - GET
@@ -1284,8 +1189,8 @@ services:
     - v1
     - motor
   - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
+    - uat-connect.kaotim.my
+    - uat-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - POST
@@ -1337,8 +1242,8 @@ services:
     - v1
     - motor
   - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
+    - uat-connect.kaotim.my
+    - uat-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - GET
@@ -1346,74 +1251,6 @@ services:
     path_handling: v0
     paths:
     - /core-api-2/family/certificate-details
-    plugins:
-    - config:
-        bypass_on_err: false
-        cache_control: false
-        cache_ttl: 300
-        content_type:
-        - text/plain
-        - application/json
-        ignore_uri_case: false
-        memory:
-          dictionary_name: kong_db_cache
-        request_method:
-        - GET
-        - HEAD
-        response_code:
-        - 200
-        - 301
-        - 404
-        response_headers:
-          X-Cache-Key: true
-          X-Cache-Status: true
-          age: true
-        storage_ttl: null
-        strategy: redis
-        vary_headers: null
-        vary_query_params: null
-      enabled: true
-      instance_name: CoreApiV2-Family-Certificate-Details-Cache
-      name: proxy-cache-advanced
-      partials:
-      - id: 3c5ba52d-ad6c-4027-a92b-24121026097e
-        name: on-cloud-dev-redis-cache
-        path: config.redis
-      protocols:
-      - grpc
-      - grpcs
-      - http
-      - https
-    - config:
-        add:
-          body: []
-          headers: []
-          querystring: []
-        append:
-          body: []
-          headers: []
-          querystring: []
-        http_method: null
-        remove:
-          body: []
-          headers: []
-          querystring: []
-        rename:
-          body: []
-          headers: []
-          querystring: []
-        replace:
-          body: []
-          headers: []
-          querystring: []
-          uri: /core-api/api/v2/family/certificate-details
-      enabled: true
-      name: request-transformer
-      protocols:
-      - grpc
-      - grpcs
-      - http
-      - https
     preserve_host: false
     protocols:
     - http
@@ -1427,8 +1264,8 @@ services:
     - v2
     - family
   - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
+    - uat-connect.kaotim.my
+    - uat-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - GET
@@ -1437,43 +1274,6 @@ services:
     paths:
     - /core-api-2/motor/certificate-details
     plugins:
-    - config:
-        bypass_on_err: false
-        cache_control: false
-        cache_ttl: 300
-        content_type:
-        - text/plain
-        - application/json
-        ignore_uri_case: false
-        memory:
-          dictionary_name: kong_db_cache
-        request_method:
-        - GET
-        - HEAD
-        response_code:
-        - 200
-        - 301
-        - 404
-        response_headers:
-          X-Cache-Key: true
-          X-Cache-Status: true
-          age: true
-        storage_ttl: null
-        strategy: redis
-        vary_headers: null
-        vary_query_params: null
-      enabled: true
-      instance_name: CoreApiV2-Motor-Certificate-Details-Cache
-      name: proxy-cache-advanced
-      partials:
-      - id: 3c5ba52d-ad6c-4027-a92b-24121026097e
-        name: on-cloud-dev-redis-cache
-        path: config.redis
-      protocols:
-      - grpc
-      - grpcs
-      - http
-      - https
     - config:
         add:
           body: []
@@ -1517,8 +1317,8 @@ services:
     - v2
     - motor
   - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
+    - uat-connect.kaotim.my
+    - uat-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - GET
@@ -1527,43 +1327,6 @@ services:
     paths:
     - /general-services/create-cp-id/retry-failed
     plugins:
-    - config:
-        bypass_on_err: false
-        cache_control: false
-        cache_ttl: 300
-        content_type:
-        - text/plain
-        - application/json
-        ignore_uri_case: false
-        memory:
-          dictionary_name: kong_db_cache
-        request_method:
-        - GET
-        - HEAD
-        response_code:
-        - 200
-        - 301
-        - 404
-        response_headers:
-          X-Cache-Key: true
-          X-Cache-Status: true
-          age: true
-        storage_ttl: null
-        strategy: redis
-        vary_headers: null
-        vary_query_params: null
-      enabled: true
-      instance_name: GeneralServices-Create-CP-ID-Retry-Failed-Cache
-      name: proxy-cache-advanced
-      partials:
-      - id: 3c5ba52d-ad6c-4027-a92b-24121026097e
-        name: on-cloud-dev-redis-cache
-        path: config.redis
-      protocols:
-      - grpc
-      - grpcs
-      - http
-      - https
     - config:
         add:
           body: []
@@ -1606,8 +1369,8 @@ services:
     - generalServices
     - v1
   - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
+    - uat-connect.kaotim.my
+    - uat-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - POST
@@ -1658,8 +1421,8 @@ services:
     - generalServices
     - v1
   - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
+    - uat-connect.kaotim.my
+    - uat-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - POST
@@ -1668,41 +1431,6 @@ services:
     paths:
     - /general-services/motor/decrypt-renewal-link
     plugins:
-    - config:
-        access:
-        - |-
-          kong.service.request.enable_buffering()
-
-          local body, err = kong.request.get_raw_body()
-          if body and body ~= "" then
-              kong.log.set_serialize_value("request.body", body)
-          else
-              kong.log.set_serialize_value("request.body", "no request body")
-          end
-        body_filter: []
-        certificate: []
-        functions: []
-        header_filter: []
-        log:
-        - |-
-          local raw_response_body = kong.service.response.get_raw_body()
-          if raw_response_body and raw_response_body ~= "" then
-              kong.log.set_serialize_value("response.body", raw_response_body)
-          else
-              kong.log.set_serialize_value("response.body", "no response body")
-          end
-        rewrite: []
-        ws_client_frame: []
-        ws_close: []
-        ws_handshake: []
-        ws_upstream_frame: []
-      enabled: true
-      name: pre-function
-      protocols:
-      - grpc
-      - grpcs
-      - http
-      - https
     - config:
         add:
           body: []
@@ -1733,6 +1461,42 @@ services:
       - grpcs
       - http
       - https
+    - config:
+        add:
+          body: []
+          headers: []
+          json_types: []
+          querystring: []
+        allow:
+          body: null
+        append:
+          body: []
+          headers: []
+          json_types: []
+          querystring: []
+        dots_in_keys: true
+        http_method: null
+        remove:
+          body: []
+          headers: []
+          querystring: []
+        rename:
+          body: []
+          headers: []
+          querystring: []
+        replace:
+          body: []
+          headers: []
+          json_types: []
+          querystring: []
+          uri: /kaotim-general-services/api/v1/motor/decrypt-renewal-link
+      enabled: false
+      name: request-transformer-advanced
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
     preserve_host: false
     protocols:
     - http
@@ -1745,8 +1509,8 @@ services:
     - generalServices
     - v1
   - hosts:
-    - dev-connect.kaotim.my
-    - dev-connect.kaotim.cloud
+    - uat-connect.kaotim.my
+    - uat-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - POST
@@ -1797,8 +1561,46 @@ services:
     - generalServices
     - v1
   write_timeout: 60000
+- connect_timeout: 60000
+  enabled: true
+  host: ct45ecj9xgdgt1fm.sg.identity.konghq.com
+  name: Uat-OnCloud-Get-Token
+  path: /auth/oauth/token
+  plugins:
+  - config:
+      custom_fields_by_lua: {}
+      path: /usr/local/kong/logs/transaction.log
+      reopen: false
+    enabled: true
+    name: file-log
+    protocols:
+    - grpc
+    - grpcs
+    - http
+    - https
+  port: 443
+  protocol: https
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - hosts:
+    - uat-connect.kaotim.my
+    - uat-connect.kaotim.cloud
+    https_redirect_status_code: 426
+    name: OIDC-Get-Token
+    path_handling: v0
+    paths:
+    - /api/token
+    preserve_host: false
+    protocols:
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+  write_timeout: 60000
 vaults:
 - config:
-    config_store_id: 2e3326f0-6e90-44bb-9dcf-eeffd9318c7b
+    config_store_id: bd2430ef-0eb8-45fe-8cb7-d8f75bf3fca0
   name: konnect
   prefix: identity

@@ -9,10 +9,10 @@ partials:
     connect_timeout: 2000
     connection_is_proxied: false
     database: 0
-    host: 10.8.2.68
+    host: __REDIS_HOST__
     keepalive_backlog: 0
     keepalive_pool_size: 256
-    password: redis-takaful@2025
+    password: '{vault://identity/redis-cache-password}'
     port: 6379
     read_timeout: 2000
     send_timeout: 2000

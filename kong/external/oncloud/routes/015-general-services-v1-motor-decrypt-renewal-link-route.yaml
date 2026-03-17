@@ -14,6 +14,41 @@ __OPTIONAL_PUBLIC_HOST_SECONDARY__
   - /general-services/motor/decrypt-renewal-link
   plugins:
   - config:
+      access:
+      - |-
+        kong.service.request.enable_buffering()
+
+        local body, err = kong.request.get_raw_body()
+        if body and body ~= "" then
+            kong.log.set_serialize_value("request.body", body)
+        else
+            kong.log.set_serialize_value("request.body", "no request body")
+        end
+      body_filter: []
+      certificate: []
+      functions: []
+      header_filter: []
+      log:
+      - |-
+        local raw_response_body = kong.service.response.get_raw_body()
+        if raw_response_body and raw_response_body ~= "" then
+            kong.log.set_serialize_value("response.body", raw_response_body)
+        else
+            kong.log.set_serialize_value("response.body", "no response body")
+        end
+      rewrite: []
+      ws_client_frame: []
+      ws_close: []
+      ws_handshake: []
+      ws_upstream_frame: []
+    enabled: true
+    name: pre-function
+    protocols:
+    - grpc
+    - grpcs
+    - http
+    - https
+  - config:
       add:
         body: []
         headers: []
@@ -38,42 +73,6 @@ __OPTIONAL_PUBLIC_HOST_SECONDARY__
         uri: /kaotim-general-services/api/v1/motor/decrypt-renewal-link
     enabled: true
     name: request-transformer
-    protocols:
-    - grpc
-    - grpcs
-    - http
-    - https
-  - config:
-      add:
-        body: []
-        headers: []
-        json_types: []
-        querystring: []
-      allow:
-        body: null
-      append:
-        body: []
-        headers: []
-        json_types: []
-        querystring: []
-      dots_in_keys: true
-      http_method: null
-      remove:
-        body: []
-        headers: []
-        querystring: []
-      rename:
-        body: []
-        headers: []
-        querystring: []
-      replace:
-        body: []
-        headers: []
-        json_types: []
-        querystring: []
-        uri: /kaotim-general-services/api/v1/motor/decrypt-renewal-link
-    enabled: false
-    name: request-transformer-advanced
     protocols:
     - grpc
     - grpcs
