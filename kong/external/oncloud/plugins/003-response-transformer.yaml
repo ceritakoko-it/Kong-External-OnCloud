@@ -1,0 +1,29 @@
+_format_version: "3.0"
+_konnect:
+  control_plane_name: __CONTROL_PLANE_NAME__
+plugins:
+- config:
+    add:
+      headers:
+      - 'Strict-Transport-Security: max-age=31536000; includeSubDomains'
+      json: []
+      json_types: []
+    append:
+      headers: []
+      json: []
+      json_types: []
+    remove:
+      headers: []
+      json: []
+    rename:
+      headers: []
+      json: []
+    replace:
+      headers: []
+      json: []
+      json_types: []
+  enabled: true
+  name: response-transformer
+  protocols:
+  - http
+  - https
