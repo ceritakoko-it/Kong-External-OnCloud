@@ -17,9 +17,7 @@ parameters:
   values:
   - Dev
   - Uat
-  - PreProd
   - Prod
-  - DR
 - name: controlPlane
   displayName: Control Plane
   type: string
@@ -69,11 +67,11 @@ stages:
             echo "Invalid run: promotion must run from refs/heads/master."
             exit 1
           fi
-          if [ "$ENVIRONMENT" = "PreProd" ] || [ "$ENVIRONMENT" = "Prod" ] || [ "$ENVIRONMENT" = "DR" ]; then
+          if [ "$ENVIRONMENT" = "Prod" ]; then
             echo "Valid run: promotion to ${ENVIRONMENT} from master branch."
             exit 0
           fi
-          echo "Invalid run: promotion supports only PreProd, Prod, or DR."
+          echo "Invalid run: promotion supports only Prod."
           exit 1
         fi
 

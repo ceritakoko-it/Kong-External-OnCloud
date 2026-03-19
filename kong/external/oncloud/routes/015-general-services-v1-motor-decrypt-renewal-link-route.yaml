@@ -18,7 +18,7 @@ __OPTIONAL_PUBLIC_HOST_SECONDARY__
       - |-
         kong.service.request.enable_buffering()
 
-        local body, err = kong.request.get_raw_body()
+        local body, err = kong.request.get_body()
         if body and body ~= "" then
             kong.log.set_serialize_value("request.body", body)
         else
@@ -30,9 +30,9 @@ __OPTIONAL_PUBLIC_HOST_SECONDARY__
       header_filter: []
       log:
       - |-
-        local raw_response_body = kong.service.response.get_raw_body()
-        if raw_response_body and raw_response_body ~= "" then
-            kong.log.set_serialize_value("response.body", raw_response_body)
+        local response_body = kong.service.response.get_body()
+        if response_body and response_body ~= "" then
+            kong.log.set_serialize_value("response.body", response_body)
         else
             kong.log.set_serialize_value("response.body", "no response body")
         end

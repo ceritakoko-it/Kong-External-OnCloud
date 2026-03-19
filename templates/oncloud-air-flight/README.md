@@ -29,7 +29,7 @@ Included samples:
 2. Create the `route` and point it to the service.
 3. Add any `plugin` needed on the route, service, or globally.
 4. Add the `consumer` if the API is accessed by a known client or partner.
-5. Add or update `kong/env/*.env` if the new config needs environment-specific values.
+5. Add or update `kong/env/system/*.env` or `kong/env/user/*-oncloud.env` if the new config needs environment-specific values.
 6. Validate the copied files with `deck file validate`.
 
 ## Service onboarding
@@ -54,7 +54,7 @@ Update these fields:
 When to use env variables:
 
 - use env variables if the upstream host or other values differ by environment
-- add the variable to all required files under `kong/env/*.env`
+- add the variable to the required files under `kong/env/system/*.env` or `kong/env/user/*-oncloud.env`
 - use the placeholder token inside `kong/external/oncloud/`, for example `__AIR_FLIGHT_SERVICE_HOST__`
 
 Example outcome:
@@ -116,7 +116,7 @@ Plugin checks:
 
 - confirm the referenced route, service, or consumer already exists
 - use one file per plugin for clarity
-- if the plugin contains environment-specific values, add them to `kong/env/*.env` and reference them through placeholders
+- if the plugin contains environment-specific values, add them to `kong/env/system/*.env` or `kong/env/user/*-oncloud.env` and reference them through placeholders
 
 Example outcomes:
 
@@ -144,7 +144,7 @@ Consumer checks:
 
 - use a stable username that reflects the calling application or partner
 - use `custom_id` only when you need a stable external identifier
-- parameterize `custom_id` in `kong/env/*.env` when the value differs by environment
+- parameterize `custom_id` in `kong/env/system/*.env` when the value differs by environment
 - use a clear env naming pattern, for example `<CONSUMER_NAME>_CUSTOM_ID`
 - if authentication credentials are needed, create the related credential object in the appropriate Kong config after the consumer is defined
 
@@ -161,17 +161,19 @@ Example outcome:
 
 Add new variables to:
 
-- `kong/env/dev-oncloud.env`
-- `kong/env/uat-oncloud.env`
-- `kong/env/preprod-oncloud.env`
-- `kong/env/prod-oncloud.env`
-- `kong/env/dr-oncloud.env`
+- `kong/env/system/dev-system.env`
+- `kong/env/system/uat-system.env`
+- `kong/env/system/prod-system.env`
+- `kong/env/user/dev-oncloud.env`
+- `kong/env/user/uat-oncloud.env`
+- `kong/env/user/prod-oncloud.env`
 
 Use env variables for values such as:
 
 - upstream host names
 - public host names
 - issuer URLs
+- Redis partial IDs, types, hosts, passwords, and Sentinel settings
 - consumer `custom_id` values
 - vault or partial references
 
@@ -194,5 +196,5 @@ Before creating a PR or running deployment:
 1. Confirm all copied files are under `kong/external/oncloud/`, not under `templates/`.
 2. Confirm numbering does not collide with existing files.
 3. Confirm all `__PLACEHOLDER__` values have been replaced in live config.
-4. Confirm any new env variables exist in every required `kong/env/*.env` file.
+4. Confirm any new env variables exist in every required `kong/env/system/*.env` or `kong/env/user/*-oncloud.env` file.
 5. Run `deck file validate kong/external/oncloud`.

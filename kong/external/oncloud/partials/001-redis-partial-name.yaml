@@ -6,13 +6,13 @@ partials:
     cloud_authentication: null
     database: 0
     host: __REDIS_HOST__
-    password: '{vault://identity/redis-cache-password}'
+    password: "__REDIS_PASSWORD__"
     port: 6379
     server_name: null
     ssl: false
     ssl_verify: false
     timeout: 2000
     username: null
-  id: 9541e197-dab6-44b6-b915-9fa84ded895e
+  id: __REDIS_PARTIAL_ID__
   name: __REDIS_PARTIAL_NAME__
   type: redis-ce
