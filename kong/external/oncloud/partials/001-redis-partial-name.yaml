@@ -6,7 +6,7 @@ partials:
     cloud_authentication: null
     database: 0
     host: __REDIS_HOST__
-    password: __REDIS_PASSWORD__
+    password: "__REDIS_PASSWORD__"
     port: 6379
     server_name: null
     ssl: false
