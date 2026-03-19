@@ -42,7 +42,8 @@ __OPTIONAL_PUBLIC_HOST_SECONDARY__
     instance_name: GeneralServices-Create-CP-ID-Retry-Failed-Cache
     name: proxy-cache-advanced
     partials:
-    - name: __REDIS_CACHE_PARTIAL_NAME__
+    - id: __REDIS_CACHE_PARTIAL_ID__
+      name: __REDIS_CACHE_PARTIAL_NAME__
       path: config.redis
     protocols:
     - grpc

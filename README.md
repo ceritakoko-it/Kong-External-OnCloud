@@ -5,7 +5,7 @@ This repository is the source of truth for Kong decK configuration and promotion
 For `OnCloud`, the source of truth is:
 
 - shared base: `kong/external/oncloud`
-- environment values: `kong/env/*.env`
+- environment values: `kong/env/system/*.env` and `kong/env/user/*-oncloud.env`
 
 Reusable onboarding samples live outside the deployable tree:
 
@@ -26,7 +26,7 @@ That folder is documentation/template material only. It is intentionally outside
 ## Branching Strategy
 
 - `development` is used for deployment to Dev.
-- `master` is used for deployment to Uat, promotions to PreProd/Prod/DR, and rollback to Uat/Prod.
+- `master` is used for deployment to Uat/Prod, promotion to Prod, and rollback to Uat/Prod.
 - Feature work is done in feature branches and merged via PR.
 - Hotfix work can branch from `master` and merge back to `master`.
 
@@ -40,7 +40,7 @@ The pipeline is manual-only:
 Run via Azure DevOps `Run pipeline` with parameters:
 
 - `mode`: `deployment` or `promotion` or `rollback`
-- `environment`: `Dev`, `Uat`, `PreProd`, `Prod`, `DR`
+- `environment`: `Dev`, `Uat`, `Prod`
 - `controlPlane`: `OnCloud`
 - `rollbackBuildId`: required when `mode=rollback`, points to the source pipeline `BuildId` that published backup artifact
 - `rollbackBackupFile`: required when `mode=rollback`, exact backup YAML filename inside the published artifact
@@ -73,39 +73,44 @@ Without these values, deployment, promotion, and rollback will fail in the `Vali
 
 ## Environment Setup
 
-For `OnCloud`, each environment must have a matching env file under `kong/env/`.
+For `OnCloud`, each environment is rendered from:
+
+- `kong/env/system/<env>-system.env`
+- `kong/env/user/<env>-oncloud.env`
 
 Current files:
 
-- `kong/env/dev-oncloud.env`
-- `kong/env/uat-oncloud.env`
-- `kong/env/preprod-oncloud.env`
-- `kong/env/prod-oncloud.env`
-- `kong/env/dr-oncloud.env`
+- `kong/env/system/dev-system.env`
+- `kong/env/system/uat-system.env`
+- `kong/env/system/prod-system.env`
+- `kong/env/user/dev-oncloud.env`
+- `kong/env/user/uat-oncloud.env`
+- `kong/env/user/prod-oncloud.env`
 
-Each env file contains the values used to render the shared base.
+The renderer loads the matching `system` file first, then overlays the selected `user` file.
 
 Values that usually must be reviewed per environment:
 
 - `CONTROL_PLANE_NAME`
-- `PUBLIC_HOST_PRIMARY`
-- `PUBLIC_HOST_SECONDARY`
 - `GET_TOKEN_SERVICE_NAME`
 - `GET_TOKEN_SERVICE_HOST`
 - `ISSUER_URL`
-- `KAOTIM_SERVICE_HOST`
-- `STANDARD_CORE_API_USER_CUSTOM_ID`
-- `STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID`
+- `REDIS_HOST`
 - `REDIS_PARTIAL_NAME`
 - `REDIS_CACHE_PARTIAL_NAME`
 - `VAULT_CONFIG_STORE_ID`
+- `STANDARD_CORE_API_USER_CUSTOM_ID`
+- `STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID`
+- `PUBLIC_HOST_PRIMARY`
+- `PUBLIC_HOST_SECONDARY`
+- `KAOTIM_SERVICE_HOST`
 
 Consumer `custom_id` mapping:
 
 - `STANDARD_CORE_API_USER_CUSTOM_ID` -> consumer `standard_core_api_user`
 - `STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID` -> consumer `standard_general_services_user`
 
-### First-Time Setup For Uat / PreProd / Prod / DR
+### First-Time Setup For Uat / Prod
 
 Before first deployment to a new environment, make sure these dependencies already exist in Konnect for that target environment:
 
@@ -145,7 +150,7 @@ If Konnect returns:
 }
 ```
 
-Then the env file must contain:
+Then the matching `kong/env/system/<env>-system.env` file must contain:
 
 ```env
 VAULT_CONFIG_STORE_ID=<config-store-id>
@@ -195,11 +200,6 @@ Before first run for each environment, verify:
 - `STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID=yz955goaapqvdt3r`
 - `VAULT_CONFIG_STORE_ID` matches the UAT config store
 
-`PreProd-OnCloud`
-- `CONTROL_PLANE_NAME=PreProd-OnCloud`
-- set the real PreProd identity host and issuer before first run
-- set the real PreProd `VAULT_CONFIG_STORE_ID` before first run
-
 `Prod-OnCloud`
 - `CONTROL_PLANE_NAME=Prod-OnCloud`
 - `GET_TOKEN_SERVICE_HOST=<prod-identity-domain>.sg.identity.konghq.com`
@@ -207,11 +207,6 @@ Before first run for each environment, verify:
 - `STANDARD_CORE_API_USER_CUSTOM_ID=7fkajd8uqyeagaxz`
 - `STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID=84dunjlkr2lue0ul`
 - `VAULT_CONFIG_STORE_ID` matches the Prod config store
-
-`DR-OnCloud`
-- `CONTROL_PLANE_NAME=DR-OnCloud`
-- set the real DR identity host and issuer before first run
-- set the real DR `VAULT_CONFIG_STORE_ID` before first run
 
 ## Governance Rules (Enforced)
 
@@ -229,32 +224,22 @@ Allowed combinations:
 - `environment=Uat`
 - branch `refs/heads/master`
 
-3. Promotion Uat -> PreProd
-- `mode=promotion`
-- `environment=PreProd`
-- branch `refs/heads/master`
-
-4. Promotion PreProd -> Prod
+3. Promotion Uat -> Prod
 - `mode=promotion`
 - `environment=Prod`
 - branch `refs/heads/master`
 
-5. Promotion Prod -> DR
-- `mode=promotion`
-- `environment=DR`
-- branch `refs/heads/master`
-
-6. Rollback to Dev
+4. Rollback to Dev
 - `mode=rollback`
 - `environment=Dev`
 - branch `refs/heads/development`
 
-7. Rollback to Uat
+5. Rollback to Uat
 - `mode=rollback`
 - `environment=Uat`
 - branch `refs/heads/master`
 
-8. Rollback to Prod
+6. Rollback to Prod
 - `mode=rollback`
 - `environment=Prod`
 - branch `refs/heads/master`
@@ -280,31 +265,47 @@ OnCloud repository behavior:
 
 1. `kong/external/oncloud` is the shared base template.
 2. The selected target environment loads:
-- `kong/env/dev-oncloud.env`
-- `kong/env/uat-oncloud.env`
-- `kong/env/preprod-oncloud.env`
-- `kong/env/prod-oncloud.env`
-- `kong/env/dr-oncloud.env`
+- `kong/env/system/<env>-system.env`
+- `kong/env/user/<env>-oncloud.env`
 3. The pipeline renders the shared base into a temporary folder and deploys that rendered output.
 4. `kong/<env>/oncloud` folders are no longer used for `OnCloud`.
 
-Environment files currently parameterize:
+System env files currently parameterize:
 
 - `CONTROL_PLANE_NAME`
-- `PUBLIC_HOST_PRIMARY`
-- `PUBLIC_HOST_SECONDARY` (optional)
 - `GET_TOKEN_SERVICE_NAME`
 - `GET_TOKEN_SERVICE_HOST`
 - `ISSUER_URL`
-- `KAOTIM_SERVICE_HOST`
+- `REDIS_HOST`
+- `REDIS_PASSWORD`
+- `REDIS_PARTIAL_ID`
 - `STANDARD_CORE_API_USER_CUSTOM_ID`
 - `STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID`
 - `REDIS_PARTIAL_NAME`
+- `REDIS_PARTIAL_TYPE`
+- `REDIS_PARTIAL_HOST`
+- `REDIS_PARTIAL_PASSWORD`
+- `REDIS_PARTIAL_SENTINEL_MASTER`
+- `REDIS_PARTIAL_SENTINEL_NODES`
+- `REDIS_PARTIAL_SENTINEL_PASSWORD`
+- `REDIS_PARTIAL_SENTINEL_ROLE`
+- `REDIS_PARTIAL_SENTINEL_USERNAME`
+- `REDIS_CACHE_PARTIAL_ID`
 - `REDIS_CACHE_PARTIAL_NAME`
+- `REDIS_CACHE_HOST`
+- `REDIS_CACHE_PASSWORD`
+- `REDIS_CACHE_SENTINEL_MASTER`
+- `REDIS_CACHE_SENTINEL_NODES`
+- `REDIS_CACHE_SENTINEL_PASSWORD`
+- `REDIS_CACHE_SENTINEL_ROLE`
+- `REDIS_CACHE_SENTINEL_USERNAME`
 - `VAULT_CONFIG_STORE_ID`
 
 Notes:
 
+- user env files currently parameterize `PUBLIC_HOST_PRIMARY`, `PUBLIC_HOST_SECONDARY`, and `KAOTIM_SERVICE_HOST`
+- Redis partial settings now follow the same system-env structure used by `Kong-Internal-OnPrem`, so Prod can move from simple Redis to Sentinel-backed `redis-ee` without another template redesign.
+- Current intent: only `Prod` should move to Sentinel-backed `redis-ee` for advanced rate limiting. `Dev` and `Uat` stay on the current setup unless explicitly changed later.
 - `PUBLIC_HOST_PRIMARY` is required.
 - `PUBLIC_HOST_SECONDARY` is optional. If blank, the renderer removes the second `hosts` entry so route YAML stays valid.
 - `STANDARD_CORE_API_USER_CUSTOM_ID` and `STANDARD_GENERAL_SERVICES_USER_CUSTOM_ID` should be set per environment if Konnect consumer IDs differ between control planes.
@@ -381,7 +382,7 @@ flowchart TD
     E7 --> Z
 
     F --> F1{environment}
-    F1 -->|PreProd/Prod/DR| F2[Checkout + Pin Commit]
+    F1 -->|Prod| F2[Checkout + Pin Commit]
     F2 --> F4[Resolve target env file and render shared OnCloud state]
     F4 --> F5[Ping + File Validate + Diff]
     F5 --> F6{Created/Updated/Deleted > 0?}

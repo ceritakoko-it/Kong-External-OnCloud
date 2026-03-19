@@ -16,7 +16,6 @@ parameters:
   default: Uat
   values:
   - Uat
-  - PreProd
   - Prod
 - name: controlPlane
   displayName: Control Plane
@@ -64,12 +63,12 @@ stages:
         esac
 
         case "$ENVIRONMENT" in
-          Uat|PreProd|Prod)
+          Uat|Prod)
             echo "Valid run: ${MODE} on ${ENVIRONMENT} from master branch."
             exit 0
             ;;
           *)
-            echo "Invalid run: prod pipeline supports only Uat, PreProd, or Prod."
+            echo "Invalid run: prod pipeline supports only Uat or Prod."
             exit 1
             ;;
         esac

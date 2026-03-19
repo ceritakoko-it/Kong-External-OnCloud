@@ -11,7 +11,7 @@ parameters:
 stages:
 - stage: Rollback_To_${{ parameters.environment }}_${{ parameters.controlPlane }}
   displayName: Rollback to ${{ parameters.environment }} - ${{ parameters.controlPlane }}
-  condition: "and(succeeded(), ne('${{ parameters.rollbackBuildId }}', 'not-required'), or(and(eq('${{ parameters.environment }}', 'Dev'), eq(variables['Build.SourceBranch'], 'refs/heads/development')), and(or(eq('${{ parameters.environment }}', 'Uat'), eq('${{ parameters.environment }}', 'PreProd'), eq('${{ parameters.environment }}', 'Prod')), eq(variables['Build.SourceBranch'], 'refs/heads/master'))))"
+  condition: "and(succeeded(), ne('${{ parameters.rollbackBuildId }}', 'not-required'), or(and(eq('${{ parameters.environment }}', 'Dev'), eq(variables['Build.SourceBranch'], 'refs/heads/development')), and(or(eq('${{ parameters.environment }}', 'Uat'), eq('${{ parameters.environment }}', 'Prod')), eq(variables['Build.SourceBranch'], 'refs/heads/master'))))"
   jobs:
   - job: Rollback
     displayName: Rollback using backup dump artifact

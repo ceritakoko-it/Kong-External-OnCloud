@@ -7,7 +7,7 @@
 stages:
 - stage: Promote_To_${{ parameters.environment }}_${{ parameters.controlPlane }}
   displayName: Promote to ${{ parameters.environment }} - ${{ parameters.controlPlane }}
-  condition: "and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), or(eq('${{ parameters.environment }}', 'Uat'), eq('${{ parameters.environment }}', 'PreProd'), eq('${{ parameters.environment }}', 'Prod'), eq('${{ parameters.environment }}', 'DR')))"
+  condition: "and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), or(eq('${{ parameters.environment }}', 'Uat'), eq('${{ parameters.environment }}', 'Prod')))"
   jobs:
   - job: Promote
     displayName: Promote modular state
@@ -59,11 +59,9 @@ stages:
 
         case "$TARGET_ENV_LOWER" in
           uat) SOURCE_ENV="Dev"; SOURCE_ENV_LOWER="dev" ;;
-          preprod) SOURCE_ENV="Uat"; SOURCE_ENV_LOWER="uat" ;;
-          prod) SOURCE_ENV="PreProd"; SOURCE_ENV_LOWER="preprod" ;;
-          dr) SOURCE_ENV="Prod"; SOURCE_ENV_LOWER="prod" ;;
+          prod) SOURCE_ENV="Uat"; SOURCE_ENV_LOWER="uat" ;;
           *)
-            echo "Promotion target must be Uat, PreProd, Prod, or DR. Received: ${TARGET_ENV}"
+            echo "Promotion target must be Uat or Prod. Received: ${TARGET_ENV}"
             exit 1
             ;;
         esac
@@ -78,7 +76,7 @@ stages:
         TARGET_DUMP_FILE="kong-${TARGET_ENV_LOWER}-${CP_SEGMENT}.yaml"
 
         if [ "$CP_SEGMENT" = "oncloud" ] && [ -d "kong/external/oncloud" ]; then
-          ENV_FILE="kong/env/${TARGET_ENV_LOWER}-oncloud.env"
+          ENV_FILE="kong/env/user/${TARGET_ENV_LOWER}-oncloud.env"
           TARGET_DIR="$(Pipeline.Workspace)/rendered/${TARGET_ENV_LOWER}/oncloud"
           test -f "$ENV_FILE" || { echo "Environment file not found: $ENV_FILE"; exit 1; }
           set -a
