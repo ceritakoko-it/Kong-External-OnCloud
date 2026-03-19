@@ -60,13 +60,17 @@ stages:
           DUMP_FILE="kong-${ENV_LOWER}-oncloud.yaml"
           TEMPLATE_DIR="kong/external/oncloud"
           ENV_FILE="kong/env/user/${ENV_LOWER}-oncloud.env"
+          SYSTEM_ENV_FILE="kong/env/system/${ENV_LOWER}-system.env"
           RENDERED_DIR="$(Pipeline.Workspace)/rendered/${ENV_LOWER}/oncloud"
           test -f "$ENV_FILE" || { echo "Environment file not found: $ENV_FILE"; exit 1; }
+          test -f "$SYSTEM_ENV_FILE" || { echo "System environment file not found: $SYSTEM_ENV_FILE"; exit 1; }
           set -a
+          # shellcheck disable=SC1090
+          source "$SYSTEM_ENV_FILE"
           # shellcheck disable=SC1090
           source "$ENV_FILE"
           set +a
-          test -n "${CONTROL_PLANE_NAME:-}" || { echo "CONTROL_PLANE_NAME missing in $ENV_FILE"; exit 1; }
+          test -n "${CONTROL_PLANE_NAME:-}" || { echo "CONTROL_PLANE_NAME missing after loading $SYSTEM_ENV_FILE and $ENV_FILE"; exit 1; }
           CONTROL_PLANE="$CONTROL_PLANE_NAME"
           TARGET_PATH="$RENDERED_DIR"
           USE_RENDERED_STATE="true"

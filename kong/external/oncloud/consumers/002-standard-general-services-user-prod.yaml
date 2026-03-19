@@ -7,25 +7,23 @@ consumers:
   - name: General_Services_Group
   plugins:
   - config:
-      day: null
+      disable_penalty: false
       error_code: 429
-      error_message: API rate limit exceeded
-      fault_tolerant: true
-      header_name: null
       hide_client_headers: false
-      hour: __STANDARD_GENERAL_SERVICES_RATE_LIMIT_HOUR__
-      limit_by: consumer
-      minute: __STANDARD_GENERAL_SERVICES_RATE_LIMIT_MINUTE__
-      month: null
-      path: null
-      policy: redis
-      redis_server_name: null
-      redis_username: null
-      second: null
+      identifier: consumer
+      limit:
+      - __STANDARD_GENERAL_SERVICES_RATE_LIMIT_MINUTE__
+      - __STANDARD_GENERAL_SERVICES_RATE_LIMIT_HOUR__
+      namespace: standard_general_services_user_rate_limit
+      retry_after_jitter_max: 0
+      strategy: redis
       sync_rate: -1
-      year: null
+      window_size:
+      - 60
+      - 3600
+      window_type: fixed
     enabled: true
-    name: rate-limiting
+    name: rate-limiting-advanced
     partials:
     - id: __REDIS_PARTIAL_ID__
       name: __REDIS_PARTIAL_NAME__

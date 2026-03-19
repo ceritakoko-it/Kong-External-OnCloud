@@ -76,9 +76,17 @@ stages:
         set -euo pipefail
         TARGET_ENV="${{ parameters.environment }}"
         SELECTED_CP="${{ parameters.controlPlane }}"
+        TARGET_ENV_LOWER="$(echo "$TARGET_ENV" | tr '[:upper:]' '[:lower:]')"
 
         if [ "$SELECTED_CP" = "OnCloud" ] || [ "$SELECTED_CP" = "oncloud" ]; then
-          CONTROL_PLANE_TARGET="${TARGET_ENV}-OnCloud"
+          SYSTEM_ENV_FILE="kong/env/system/${TARGET_ENV_LOWER}-system.env"
+          test -f "$SYSTEM_ENV_FILE" || { echo "System environment file not found: $SYSTEM_ENV_FILE"; exit 1; }
+          set -a
+          # shellcheck disable=SC1090
+          source "$SYSTEM_ENV_FILE"
+          set +a
+          test -n "${CONTROL_PLANE_NAME:-}" || { echo "CONTROL_PLANE_NAME missing after loading $SYSTEM_ENV_FILE"; exit 1; }
+          CONTROL_PLANE_TARGET="$CONTROL_PLANE_NAME"
           ARTIFACT_CP="OnCloud"
         else
           echo "Unsupported controlPlane parameter: ${SELECTED_CP}. Only OnCloud is supported."
