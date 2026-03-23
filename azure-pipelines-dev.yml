@@ -46,26 +46,26 @@ stages:
         ENVIRONMENT="${{ parameters.environment }}"
         BRANCH="$(Build.SourceBranch)"
 
-        if [ "$MODE" = "deployment" ]; then
-          if [ "$ENVIRONMENT" = "Dev" ] && [ "$BRANCH" = "refs/heads/development" ]; then
-            echo "Valid run: deployment on Dev from development branch."
-            exit 0
-          fi
-          echo "Invalid run: nonprod deployment supports only Dev@development."
+        if [ "$ENVIRONMENT" != "Dev" ]; then
+          echo "Invalid run: dev pipeline supports only Dev."
           exit 1
         fi
 
-        if [ "$MODE" = "rollback" ]; then
-          if [ "$ENVIRONMENT" = "Dev" ] && [ "$BRANCH" = "refs/heads/development" ]; then
-            echo "Valid run: rollback on Dev from development branch."
-            exit 0
-          fi
-          echo "Invalid run: nonprod rollback supports only Dev@development."
+        if [ "$BRANCH" != "refs/heads/development" ]; then
+          echo "Invalid run: dev pipeline must run from refs/heads/development."
           exit 1
         fi
 
-        echo "Invalid run: unsupported mode '$MODE' for nonprod pipeline."
-        exit 1
+        case "$MODE" in
+          deployment|rollback)
+            echo "Valid run: ${MODE} on Dev from development branch."
+            exit 0
+            ;;
+          *)
+            echo "Invalid run: dev pipeline supports only deployment or rollback."
+            exit 1
+            ;;
+        esac
       displayName: Enforce pipeline guardrails
 
 - ${{ if eq(parameters.mode, 'deployment') }}:
