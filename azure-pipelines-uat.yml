@@ -1,0 +1,62 @@
+trigger: none
+pr: none
+
+parameters:
+- name: mode
+  displayName: Pipeline Mode
+  type: string
+  default: deployment
+  values:
+  - deployment
+- name: environment
+  displayName: Target Environment
+  type: string
+  default: Uat
+  values:
+  - Uat
+- name: controlPlane
+  displayName: Control Plane
+  type: string
+  default: OnCloud
+  values:
+  - OnCloud
+
+stages:
+- stage: Validate_Run_Rules
+  displayName: Validate run rules
+  jobs:
+  - job: ValidateRules
+    displayName: Check mode/environment/branch rules
+    pool:
+      name: cicd-agent
+    steps:
+    - bash: |
+        set -euo pipefail
+
+        MODE="${{ parameters.mode }}"
+        ENVIRONMENT="${{ parameters.environment }}"
+        BRANCH="$(Build.SourceBranch)"
+
+        if [ "$MODE" != "deployment" ]; then
+          echo "Invalid run: uat pipeline supports only deployment."
+          exit 1
+        fi
+
+        if [ "$ENVIRONMENT" != "Uat" ]; then
+          echo "Invalid run: uat pipeline supports only Uat."
+          exit 1
+        fi
+
+        if [ "$BRANCH" != "refs/heads/master" ]; then
+          echo "Invalid run: uat pipeline must run from refs/heads/master."
+          exit 1
+        fi
+
+        echo "Valid run: deployment on Uat from master branch."
+        exit 0
+      displayName: Enforce pipeline guardrails
+
+- template: pipelines/deployment.yml
+  parameters:
+    environment: ${{ parameters.environment }}
+    controlPlane: ${{ parameters.controlPlane }}
