@@ -251,7 +251,7 @@ consumers:
       hide_client_headers: false
       hour: null
       limit_by: consumer
-      minute: 100
+      minute: 1
       month: null
       path: null
       policy: redis
@@ -260,7 +260,7 @@ consumers:
       second: null
       sync_rate: -1
       year: null
-    enabled: false
+    enabled: true
     name: rate-limiting
     partials:
     - id: 2baa40bf-686b-484f-93b4-724330b26bf8
@@ -285,7 +285,7 @@ consumers:
       hide_client_headers: false
       hour: null
       limit_by: consumer
-      minute: 100
+      minute: 1
       month: null
       path: null
       policy: redis
@@ -307,32 +307,6 @@ consumers:
     - https
   username: standard_general_services_user
 partials:
-- config:
-    cloud_authentication: null
-    cluster_max_redirections: 5
-    cluster_nodes: null
-    connect_timeout: 2000
-    connection_is_proxied: false
-    database: 0
-    host: 47.236.55.30
-    keepalive_backlog: 0
-    keepalive_pool_size: 256
-    password: izenotes@123
-    port: 6379
-    read_timeout: 2000
-    send_timeout: 2000
-    sentinel_master: null
-    sentinel_nodes: null
-    sentinel_password: null
-    sentinel_role: null
-    sentinel_username: null
-    server_name: null
-    ssl: false
-    ssl_verify: false
-    username: null
-  id: 81a39a77-b8d4-4860-a068-5d927ec5da2a
-  name: izeno-redis-cache
-  type: redis-ee
 - config:
     cloud_authentication: null
     database: 0
@@ -450,50 +424,54 @@ services:
       functions:
       - |-
         return function(status, body, headers)
-            body = body or {}
+            if type(body) ~= "table" then
+                body = {}
+            end
 
-            local is_kong_id = headers["x-kong-request-id"] or headers["X-Kong-Request-ID"]
-            local auth_header = headers["www-authenticate"] or headers["WWW-Authenticate"] or ""
-            local is_oidc_error = string.find(auth_header, "konghq.com") ~= nil
+            if headers == nil then
+                headers = {}
+            end
 
-            if is_kong_id or is_oidc_error then
-                if status == 400 then
-                    body.internal_code = 8400
-                    body.error_type = "API_INVALID_REQUEST"
-                    body.message = "Invalid request parameters"
-                elseif status == 401 then
-                    body.internal_code = 8401
-                    body.error_type = "API_UNAUTHORIZED"
-                    body.message = "Authentication failed"
-                elseif status == 403 then
-                    body.internal_code = 8403
-                    body.error_type = "API_FORBIDDEN"
-                    body.message = "Insufficient permissions"
-                elseif status == 404 then
-                    body.internal_code = 8404
-                    body.error_type = "API_NOT_FOUND"
-                    body.message = "Resource not found"
-                elseif status == 409 then
-                    body.internal_code = 8409
-                    body.error_type = "API_DUPLICATE_REQUEST"
-                    body.message = "Duplicate idempotency key"
-                elseif status == 422 then
-                    body.internal_code = 8422
-                    body.error_type = "API_VALIDATION_ERROR"
-                    body.message = "Validation failed"
-                elseif status == 429 then
-                    body.internal_code = 8429
-                    body.error_type = "API_RATE_LIMIT_EXCEEDED"
-                    body.message = "Too many requests"
-                elseif status == 500 then
-                    body.internal_code = 8500
-                    body.error_type = "API_INTERNAL_ERROR"
-                    body.message = "Internal server error"
-                elseif status == 503 then
-                    body.internal_code = 8503
-                    body.error_type = "API_SERVICE_UNAVAILABLE"
-                    body.message = "Service temporarily unavailable"
-                end
+            if status == 400 then
+                body.internal_code = 8400
+                body.error_type = "API_INVALID_REQUEST"
+                body.message = "Invalid request parameters"
+            elseif status == 401 then
+                body.internal_code = 8401
+                body.error_type = "API_UNAUTHORIZED"
+                body.message = "Authentication failed"
+            elseif status == 403 then
+                body.internal_code = 8403
+                body.error_type = "API_FORBIDDEN"
+                body.message = "Insufficient permissions"
+            elseif status == 404 then
+                body.internal_code = 8404
+                body.error_type = "API_NOT_FOUND"
+                body.message = "Resource not found"
+            elseif status == 409 then
+                body.internal_code = 8409
+                body.error_type = "API_DUPLICATE_REQUEST"
+                body.message = "Duplicate idempotency key"
+            elseif status == 422 then
+                body.internal_code = 8422
+                body.error_type = "API_VALIDATION_ERROR"
+                body.message = "Validation failed"
+            elseif status == 429 then
+                body.internal_code = 8429
+                body.error_type = "API_RATE_LIMIT_EXCEEDED"
+                body.message = "Too many requests"
+            elseif status == 500 then
+                body.internal_code = 8500
+                body.error_type = "API_INTERNAL_ERROR"
+                body.message = "Internal server error"
+            elseif status == 503 then
+                body.internal_code = 8503
+                body.error_type = "API_SERVICE_UNAVAILABLE"
+                body.message = "Service temporarily unavailable"
+            elseif status == 504 then
+                body.internal_code = 8504
+                body.error_type = "API_GATEWAY_TIMEOUT"
+                body.message = "The upstream server is timing out"
             end
 
             return status, body, headers
@@ -501,6 +479,7 @@ services:
       handle_unexpected: true
       handle_unknown: true
     enabled: true
+    instance_name: Global-Error-Handling
     name: exit-transformer
     protocols:
     - grpc
@@ -520,9 +499,10 @@ services:
     - https
   - config:
       anonymous: null
-      audience: null
+      audience:
+      - dev-oncloud
       audience_claim:
-      - aud
+      - dev-oncloud
       audience_required: null
       auth_methods:
       - password
@@ -572,11 +552,11 @@ services:
       - body
       client_id:
       - '{vault://identity/client_id_core_api}'
-      - '{vault://identity/naluri-dev-client-id}'
+      - '{vault://identity/client_id_general_services}'
       client_jwk: null
       client_secret:
       - '{vault://identity/client_secret_core_api}'
-      - '{vault://identity/naluri-dev-secret-key}'
+      - '{vault://identity/client_secret_general_services}'
       cluster_cache_redis:
         cloud_authentication:
           auth_provider: null
@@ -617,9 +597,9 @@ services:
         username: null
       cluster_cache_strategy: "off"
       consumer_by:
-      - username
       - custom_id
-      consumer_claim: null
+      consumer_claim:
+      - sub
       consumer_groups_claim: null
       consumer_groups_optional: false
       consumer_optional: false
@@ -930,6 +910,43 @@ services:
     paths:
     - /core-api/family/download
     plugins:
+    - config:
+        bypass_on_err: false
+        cache_control: false
+        cache_ttl: 300
+        content_type:
+        - text/plain
+        - application/json
+        ignore_uri_case: false
+        memory:
+          dictionary_name: kong_db_cache
+        request_method:
+        - GET
+        - HEAD
+        response_code:
+        - 200
+        - 301
+        - 404
+        response_headers:
+          X-Cache-Key: true
+          X-Cache-Status: true
+          age: true
+        storage_ttl: null
+        strategy: redis
+        vary_headers: null
+        vary_query_params: null
+      enabled: true
+      instance_name: CoreApiV1-Family-Certificate-Details-Cache
+      name: proxy-cache-advanced
+      partials:
+      - id: 3c5ba52d-ad6c-4027-a92b-24121026097e
+        name: on-cloud-uat-redis-cache
+        path: config.redis
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
     - config:
         add:
           body: []
@@ -1251,6 +1268,74 @@ services:
     path_handling: v0
     paths:
     - /core-api-2/family/certificate-details
+    plugins:
+    - config:
+        bypass_on_err: false
+        cache_control: false
+        cache_ttl: 300
+        content_type:
+        - text/plain
+        - application/json
+        ignore_uri_case: false
+        memory:
+          dictionary_name: kong_db_cache
+        request_method:
+        - GET
+        - HEAD
+        response_code:
+        - 200
+        - 301
+        - 404
+        response_headers:
+          X-Cache-Key: true
+          X-Cache-Status: true
+          age: true
+        storage_ttl: null
+        strategy: redis
+        vary_headers: null
+        vary_query_params: null
+      enabled: true
+      instance_name: CoreApiV2-Family-Certificate-Details-Cache
+      name: proxy-cache-advanced
+      partials:
+      - id: 3c5ba52d-ad6c-4027-a92b-24121026097e
+        name: on-cloud-uat-redis-cache
+        path: config.redis
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+    - config:
+        add:
+          body: []
+          headers: []
+          querystring: []
+        append:
+          body: []
+          headers: []
+          querystring: []
+        http_method: null
+        remove:
+          body: []
+          headers: []
+          querystring: []
+        rename:
+          body: []
+          headers: []
+          querystring: []
+        replace:
+          body: []
+          headers: []
+          querystring: []
+          uri: /core-api/api/v2/family/certificate-details
+      enabled: true
+      name: request-transformer
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
     preserve_host: false
     protocols:
     - http
@@ -1274,6 +1359,43 @@ services:
     paths:
     - /core-api-2/motor/certificate-details
     plugins:
+    - config:
+        bypass_on_err: false
+        cache_control: false
+        cache_ttl: 300
+        content_type:
+        - text/plain
+        - application/json
+        ignore_uri_case: false
+        memory:
+          dictionary_name: kong_db_cache
+        request_method:
+        - GET
+        - HEAD
+        response_code:
+        - 200
+        - 301
+        - 404
+        response_headers:
+          X-Cache-Key: true
+          X-Cache-Status: true
+          age: true
+        storage_ttl: null
+        strategy: redis
+        vary_headers: null
+        vary_query_params: null
+      enabled: true
+      instance_name: CoreApiV2-Motor-Certificate-Details-Cache
+      name: proxy-cache-advanced
+      partials:
+      - id: 3c5ba52d-ad6c-4027-a92b-24121026097e
+        name: on-cloud-uat-redis-cache
+        path: config.redis
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
     - config:
         add:
           body: []
@@ -1327,6 +1449,43 @@ services:
     paths:
     - /general-services/create-cp-id/retry-failed
     plugins:
+    - config:
+        bypass_on_err: false
+        cache_control: false
+        cache_ttl: 300
+        content_type:
+        - text/plain
+        - application/json
+        ignore_uri_case: false
+        memory:
+          dictionary_name: kong_db_cache
+        request_method:
+        - GET
+        - HEAD
+        response_code:
+        - 200
+        - 301
+        - 404
+        response_headers:
+          X-Cache-Key: true
+          X-Cache-Status: true
+          age: true
+        storage_ttl: null
+        strategy: redis
+        vary_headers: null
+        vary_query_params: null
+      enabled: true
+      instance_name: GeneralServices-Create-CP-ID-Retry-Failed-Cache
+      name: proxy-cache-advanced
+      partials:
+      - id: 3c5ba52d-ad6c-4027-a92b-24121026097e
+        name: on-cloud-uat-redis-cache
+        path: config.redis
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
     - config:
         add:
           body: []
@@ -1432,6 +1591,41 @@ services:
     - /general-services/motor/decrypt-renewal-link
     plugins:
     - config:
+        access:
+        - |-
+          kong.service.request.enable_buffering()
+
+          local body, err = kong.request.get_body()
+          if body and body ~= "" then
+              kong.log.set_serialize_value("request.body", body)
+          else
+              kong.log.set_serialize_value("request.body", "no request body")
+          end
+        body_filter: []
+        certificate: []
+        functions: []
+        header_filter: []
+        log:
+        - |-
+          local response_body = kong.service.response.get_body()
+          if response_body and response_body ~= "" then
+              kong.log.set_serialize_value("response.body", response_body)
+          else
+              kong.log.set_serialize_value("response.body", "no response body")
+          end
+        rewrite: []
+        ws_client_frame: []
+        ws_close: []
+        ws_handshake: []
+        ws_upstream_frame: []
+      enabled: true
+      name: pre-function
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+    - config:
         add:
           body: []
           headers: []
@@ -1456,42 +1650,6 @@ services:
           uri: /kaotim-general-services/api/v1/motor/decrypt-renewal-link
       enabled: true
       name: request-transformer
-      protocols:
-      - grpc
-      - grpcs
-      - http
-      - https
-    - config:
-        add:
-          body: []
-          headers: []
-          json_types: []
-          querystring: []
-        allow:
-          body: null
-        append:
-          body: []
-          headers: []
-          json_types: []
-          querystring: []
-        dots_in_keys: true
-        http_method: null
-        remove:
-          body: []
-          headers: []
-          querystring: []
-        rename:
-          body: []
-          headers: []
-          querystring: []
-        replace:
-          body: []
-          headers: []
-          json_types: []
-          querystring: []
-          uri: /kaotim-general-services/api/v1/motor/decrypt-renewal-link
-      enabled: false
-      name: request-transformer-advanced
       protocols:
       - grpc
       - grpcs
