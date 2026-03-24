@@ -5,7 +5,7 @@ services:
 - connect_timeout: 60000
   enabled: true
   host: __KAOTIM_SERVICE_HOST__
-  name: UAT3-Kaotim
+  name: Kaotim-Cloud
   plugins:
   - config:
       functions:
