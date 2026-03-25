@@ -2,6 +2,12 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOCAL_SECRET_FILE="${SCRIPT_DIR}/prod-oncloud-secrets.local.sh"
+
+if [ -f "${LOCAL_SECRET_FILE}" ]; then
+  # shellcheck disable=SC1090
+  source "${LOCAL_SECRET_FILE}"
+fi
 
 export PUBLIC_HOST_PRIMARY='connect.kaotim.my'
 export FAMILY_CERTIFICATE_DOWNLOAD_BODY='{"policyNo":"TMK20250364263","documentType":"EMEDICAL_CARD"}'
