@@ -90,4 +90,4 @@ __OPTIONAL_PUBLIC_HOST_SECONDARY__
   - generalServices
   - v1
   service:
-    name: UAT3-Kaotim
+    name: Kaotim-Cloud

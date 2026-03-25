@@ -93,4 +93,4 @@ __OPTIONAL_PUBLIC_HOST_SECONDARY__
   - v2
   - family
   service:
-    name: UAT3-Kaotim
+    name: Kaotim-Cloud

@@ -56,4 +56,4 @@ __OPTIONAL_PUBLIC_HOST_SECONDARY__
   - v1
   - motor
   service:
-    name: UAT3-Kaotim
+    name: Kaotim-Cloud
