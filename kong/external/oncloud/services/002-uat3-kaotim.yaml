@@ -461,10 +461,6 @@ services:
       ws_upstream_frame: []
     enabled: true
     name: post-function
-    ordering:
-      after:
-        access:
-        - openid-connect
     protocols:
     - grpc
     - grpcs
