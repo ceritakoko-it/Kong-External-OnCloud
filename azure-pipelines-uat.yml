@@ -21,13 +21,6 @@ parameters:
   default: OnCloud
   values:
   - OnCloud
-- name: redisMode
-  displayName: Redis Mode
-  type: string
-  default: primary
-  values:
-  - primary
-  - preprod
 - name: rollbackBuildId
   displayName: Rollback source Run/Build ID
   type: string
@@ -80,7 +73,6 @@ stages:
     parameters:
       environment: ${{ parameters.environment }}
       controlPlane: ${{ parameters.controlPlane }}
-      redisMode: ${{ parameters.redisMode }}
 
 - ${{ if eq(parameters.mode, 'rollback') }}:
   - template: pipelines/rollback.yml
