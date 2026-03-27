@@ -1,0 +1,30 @@
+_format_version: "3.0"
+_konnect:
+  control_plane_name: __CONTROL_PLANE_NAME__
+partials:
+- config:
+    cloud_authentication: null
+    cluster_max_redirections: 5
+    cluster_nodes: null
+    connect_timeout: 2000
+    connection_is_proxied: false
+    database: 0
+    host: __PREPROD_REDIS_CACHE_PARTIAL_HOST__
+    keepalive_backlog: 0
+    keepalive_pool_size: 256
+    password: __PREPROD_REDIS_CACHE_PARTIAL_PASSWORD__
+    port: 6379
+    read_timeout: 2000
+    send_timeout: 2000
+    sentinel_master: __PREPROD_REDIS_CACHE_PARTIAL_SENTINEL_MASTER__
+    sentinel_nodes: __PREPROD_REDIS_CACHE_PARTIAL_SENTINEL_NODES__
+    sentinel_password: __PREPROD_REDIS_CACHE_PARTIAL_SENTINEL_PASSWORD__
+    sentinel_role: __PREPROD_REDIS_CACHE_PARTIAL_SENTINEL_ROLE__
+    sentinel_username: __PREPROD_REDIS_CACHE_PARTIAL_SENTINEL_USERNAME__
+    server_name: null
+    ssl: false
+    ssl_verify: false
+    username: __PREPROD_REDIS_CACHE_PARTIAL_USERNAME__
+  id: __PREPROD_REDIS_CACHE_PARTIAL_ID__
+  name: __PREPROD_REDIS_CACHE_PARTIAL_NAME__
+  type: redis-ee

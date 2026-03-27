@@ -254,44 +254,18 @@ consumers:
       minute: 1
       month: null
       path: null
-      policy: local
-      redis:
-        cloud_authentication:
-          auth_provider: null
-          aws_access_key_id: null
-          aws_assume_role_arn: null
-          aws_cache_name: null
-          aws_is_serverless: true
-          aws_region: null
-          aws_role_session_name: null
-          aws_secret_access_key: null
-          azure_client_id: null
-          azure_client_secret: null
-          azure_tenant_id: null
-          gcp_service_account_json: null
-        database: 0
-        host: null
-        password: null
-        port: 6379
-        server_name: null
-        ssl: false
-        ssl_verify: false
-        timeout: 2000
-        username: null
-      redis_database: 0
-      redis_host: null
-      redis_password: null
-      redis_port: 6379
+      policy: redis
       redis_server_name: null
-      redis_ssl: false
-      redis_ssl_verify: false
-      redis_timeout: 2000
       redis_username: null
       second: null
       sync_rate: -1
       year: null
-    enabled: false
+    enabled: true
     name: rate-limiting
+    partials:
+    - id: 9541e197-dab6-44b6-b915-9fa84ded895e
+      name: on-cloud-dev-redis
+      path: config.redis
     protocols:
     - grpc
     - grpcs
@@ -566,7 +540,7 @@ services:
       audience:
       - dev-oncloud
       audience_claim:
-      - aud
+      - dev-oncloud
       audience_required: null
       auth_methods:
       - password
@@ -949,39 +923,6 @@ services:
       ws_upstream_frame: []
     enabled: true
     name: post-function
-    ordering:
-      after:
-        access:
-        - openid-connect
-    protocols:
-    - grpc
-    - grpcs
-    - http
-    - https
-  - config:
-      day: null
-      error_code: 429
-      error_message: API rate limit exceeded
-      fault_tolerant: true
-      header_name: null
-      hide_client_headers: false
-      hour: null
-      limit_by: consumer
-      minute: 1
-      month: null
-      path: null
-      policy: redis
-      redis_server_name: null
-      redis_username: null
-      second: null
-      sync_rate: -1
-      year: null
-    enabled: true
-    name: rate-limiting
-    partials:
-    - id: 9541e197-dab6-44b6-b915-9fa84ded895e
-      name: on-cloud-dev-redis
-      path: config.redis
     protocols:
     - grpc
     - grpcs
@@ -1131,7 +1072,7 @@ services:
     - dev-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
-    - GET
+    - POST
     name: core-api-v1-kaotim-customer-profile-route
     path_handling: v0
     paths:
@@ -1817,3 +1758,7 @@ vaults:
     config_store_id: 2e3326f0-6e90-44bb-9dcf-eeffd9318c7b
   name: konnect
   prefix: identity
+- config:
+    config_store_id: a68557d0-7b87-41a2-a03d-d951de8adcd1
+  name: konnect
+  prefix: redis

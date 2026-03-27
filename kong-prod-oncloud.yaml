@@ -254,7 +254,7 @@ consumers:
       hide_client_headers: false
       identifier: consumer
       limit:
-      - 1
+      - 100
       - 60
       lock_dictionary_name: kong_locks
       namespace: standard_core_api_user_rate_limit
@@ -297,7 +297,7 @@ consumers:
       hide_client_headers: false
       identifier: consumer
       limit:
-      - 1
+      - 100
       - 60
       lock_dictionary_name: kong_locks
       namespace: standard_general_services_user_rate_limit
@@ -332,17 +332,21 @@ partials:
     connect_timeout: 2000
     connection_is_proxied: false
     database: 0
-    host: 10.8.2.68
+    host: 127.0.0.1
     keepalive_backlog: 0
     keepalive_pool_size: 256
-    password: '{vault://identity/redis-cache-password}'
+    password: null
     port: 6379
     read_timeout: 2000
     send_timeout: 2000
-    sentinel_master: null
-    sentinel_nodes: null
-    sentinel_password: null
-    sentinel_role: null
+    sentinel_master: mymaster
+    sentinel_nodes:
+    - host: redis-node-0.redis-headless.redis.svc.cluster.local
+      port: 26379
+    - host: redis-node-1.redis-headless.redis.svc.cluster.local
+      port: 26379
+    sentinel_password: Redis@Kaotim#2026$
+    sentinel_role: master
     sentinel_username: null
     server_name: null
     ssl: false
@@ -358,17 +362,21 @@ partials:
     connect_timeout: 2000
     connection_is_proxied: false
     database: 0
-    host: 10.8.2.68
+    host: 127.0.0.1
     keepalive_backlog: 0
     keepalive_pool_size: 256
-    password: '{vault://identity/redis-cache-password}'
+    password: null
     port: 6379
     read_timeout: 2000
     send_timeout: 2000
-    sentinel_master: null
-    sentinel_nodes: null
-    sentinel_password: null
-    sentinel_role: null
+    sentinel_master: mymaster
+    sentinel_nodes:
+    - host: redis-node-0.redis-headless.redis.svc.cluster.local
+      port: 26379
+    - host: redis-node-1.redis-headless.redis.svc.cluster.local
+      port: 26379
+    sentinel_password: Redis@Kaotim#2026$
+    sentinel_role: master
     sentinel_username: null
     server_name: null
     ssl: false
@@ -447,46 +455,8 @@ plugins:
 services:
 - connect_timeout: 60000
   enabled: true
-  host: 6in9tkubszu417l1.sg.identity.konghq.com
-  name: Prod-OnCloud-Get-Token
-  path: /auth/oauth/token
-  plugins:
-  - config:
-      custom_fields_by_lua: {}
-      path: /usr/local/kong/logs/transaction.log
-      reopen: false
-    enabled: true
-    name: file-log
-    protocols:
-    - grpc
-    - grpcs
-    - http
-    - https
-  port: 443
-  protocol: https
-  read_timeout: 60000
-  retries: 5
-  routes:
-  - hosts:
-    - prod-connect.kaotim.my
-    - prod-connect.kaotim.cloud
-    https_redirect_status_code: 426
-    name: OIDC-Get-Token
-    path_handling: v0
-    paths:
-    - /api/token
-    preserve_host: false
-    protocols:
-    - https
-    regex_priority: 0
-    request_buffering: true
-    response_buffering: true
-    strip_path: true
-  write_timeout: 60000
-- connect_timeout: 60000
-  enabled: true
-  host: uat3-apigw.kaotim.my
-  name: UAT3-Kaotim
+  host: apigw.kaotim.my
+  name: Kaotim-Cloud
   plugins:
   - config:
       functions:
@@ -953,10 +923,6 @@ services:
       ws_upstream_frame: []
     enabled: true
     name: post-function
-    ordering:
-      after:
-        access:
-        - openid-connect
     protocols:
     - grpc
     - grpcs
@@ -968,8 +934,8 @@ services:
   retries: 5
   routes:
   - hosts:
-    - prod-connect.kaotim.my
-    - prod-connect.kaotim.cloud
+    - connect.kaotim.my
+    - connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - POST
@@ -1058,8 +1024,8 @@ services:
     - v1
     - family
   - hosts:
-    - prod-connect.kaotim.my
-    - prod-connect.kaotim.cloud
+    - connect.kaotim.my
+    - connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - GET
@@ -1080,8 +1046,8 @@ services:
     - v1
     - family
   - hosts:
-    - prod-connect.kaotim.my
-    - prod-connect.kaotim.cloud
+    - connect.kaotim.my
+    - connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - GET
@@ -1102,8 +1068,8 @@ services:
     - v1
     - family
   - hosts:
-    - prod-connect.kaotim.my
-    - prod-connect.kaotim.cloud
+    - connect.kaotim.my
+    - connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - GET
@@ -1124,8 +1090,8 @@ services:
     - v1
     - kaotim
   - hosts:
-    - prod-connect.kaotim.my
-    - prod-connect.kaotim.cloud
+    - connect.kaotim.my
+    - connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - POST
@@ -1177,8 +1143,8 @@ services:
     - v1
     - motor
   - hosts:
-    - prod-connect.kaotim.my
-    - prod-connect.kaotim.cloud
+    - connect.kaotim.my
+    - connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - POST
@@ -1230,8 +1196,8 @@ services:
     - v1
     - motor
   - hosts:
-    - prod-connect.kaotim.my
-    - prod-connect.kaotim.cloud
+    - connect.kaotim.my
+    - connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - GET
@@ -1252,8 +1218,8 @@ services:
     - v1
     - motor
   - hosts:
-    - prod-connect.kaotim.my
-    - prod-connect.kaotim.cloud
+    - connect.kaotim.my
+    - connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - GET
@@ -1274,8 +1240,8 @@ services:
     - v1
     - motor
   - hosts:
-    - prod-connect.kaotim.my
-    - prod-connect.kaotim.cloud
+    - connect.kaotim.my
+    - connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - POST
@@ -1327,8 +1293,8 @@ services:
     - v1
     - motor
   - hosts:
-    - prod-connect.kaotim.my
-    - prod-connect.kaotim.cloud
+    - connect.kaotim.my
+    - connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - GET
@@ -1417,8 +1383,8 @@ services:
     - v2
     - family
   - hosts:
-    - prod-connect.kaotim.my
-    - prod-connect.kaotim.cloud
+    - connect.kaotim.my
+    - connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - GET
@@ -1507,8 +1473,8 @@ services:
     - v2
     - motor
   - hosts:
-    - prod-connect.kaotim.my
-    - prod-connect.kaotim.cloud
+    - connect.kaotim.my
+    - connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - GET
@@ -1596,8 +1562,8 @@ services:
     - generalServices
     - v1
   - hosts:
-    - prod-connect.kaotim.my
-    - prod-connect.kaotim.cloud
+    - connect.kaotim.my
+    - connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - POST
@@ -1648,8 +1614,8 @@ services:
     - generalServices
     - v1
   - hosts:
-    - prod-connect.kaotim.my
-    - prod-connect.kaotim.cloud
+    - connect.kaotim.my
+    - connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - POST
@@ -1735,8 +1701,8 @@ services:
     - generalServices
     - v1
   - hosts:
-    - prod-connect.kaotim.my
-    - prod-connect.kaotim.cloud
+    - connect.kaotim.my
+    - connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
     - POST
@@ -1787,8 +1753,50 @@ services:
     - generalServices
     - v1
   write_timeout: 60000
+- connect_timeout: 60000
+  enabled: true
+  host: 6in9tkubszu417l1.sg.identity.konghq.com
+  name: Prod-OnCloud-Get-Token
+  path: /auth/oauth/token
+  plugins:
+  - config:
+      custom_fields_by_lua: {}
+      path: /usr/local/kong/logs/transaction.log
+      reopen: false
+    enabled: true
+    name: file-log
+    protocols:
+    - grpc
+    - grpcs
+    - http
+    - https
+  port: 443
+  protocol: https
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - hosts:
+    - connect.kaotim.my
+    - connect.kaotim.cloud
+    https_redirect_status_code: 426
+    name: OIDC-Get-Token
+    path_handling: v0
+    paths:
+    - /api/token
+    preserve_host: false
+    protocols:
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+  write_timeout: 60000
 vaults:
 - config:
     config_store_id: a3f3b0e7-eb3e-4fbe-a46e-b2aba90d4b4f
   name: konnect
   prefix: identity
+- config:
+    config_store_id: 7a570b90-c461-4e1e-99b8-fbab9bff86ae
+  name: konnect
+  prefix: redis

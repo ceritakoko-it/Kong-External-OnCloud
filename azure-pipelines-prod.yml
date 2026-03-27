@@ -14,6 +14,7 @@ parameters:
   type: string
   default: Prod
   values:
+  - PreProd
   - Prod
 - name: controlPlane
   displayName: Control Plane
@@ -60,12 +61,21 @@ stages:
             ;;
         esac
 
-        if [ "$ENVIRONMENT" != "Prod" ]; then
-          echo "Invalid run: prod pipeline supports only Prod."
+        case "$ENVIRONMENT" in
+          PreProd|Prod)
+            ;;
+          *)
+            echo "Invalid run: prod pipeline supports only PreProd or Prod."
+            exit 1
+            ;;
+        esac
+
+        if [ "$MODE" = "rollback" ] && [ "$ENVIRONMENT" != "Prod" ]; then
+          echo "Invalid run: rollback is supported only for Prod."
           exit 1
         fi
 
-        echo "Valid run: ${MODE} on Prod from master branch."
+        echo "Valid run: ${MODE} on ${ENVIRONMENT} from master branch."
         exit 0
       displayName: Enforce pipeline guardrails
 

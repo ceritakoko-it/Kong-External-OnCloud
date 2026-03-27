@@ -1,0 +1,18 @@
+_format_version: "3.0"
+_konnect:
+  control_plane_name: __CONTROL_PLANE_NAME__
+partials:
+- config:
+    cloud_authentication: null
+    database: 0
+    host: __PRIMARY_REDIS_CACHE_PARTIAL_HOST__
+    password: __PRIMARY_REDIS_CACHE_PARTIAL_PASSWORD__
+    port: 6379
+    server_name: null
+    ssl: false
+    ssl_verify: false
+    timeout: 2000
+    username: __PRIMARY_REDIS_CACHE_PARTIAL_USERNAME__
+  id: __PRIMARY_REDIS_CACHE_PARTIAL_ID__
+  name: __PRIMARY_REDIS_CACHE_PARTIAL_NAME__
+  type: redis-ce
