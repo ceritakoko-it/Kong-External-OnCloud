@@ -5,14 +5,14 @@ partials:
 - config:
     cloud_authentication: null
     database: 0
-    host: __REDIS_HOST__
-    password: "__REDIS_PASSWORD__"
+    host: __PRIMARY_REDIS_PARTIAL_HOST__
+    password: __PRIMARY_REDIS_PARTIAL_PASSWORD__
     port: 6379
     server_name: null
     ssl: false
     ssl_verify: false
     timeout: 2000
-    username: null
-  id: __REDIS_PARTIAL_ID__
-  name: __REDIS_PARTIAL_NAME__
+    username: __PRIMARY_REDIS_PARTIAL_USERNAME__
+  id: __PRIMARY_REDIS_PARTIAL_ID__
+  name: __PRIMARY_REDIS_PARTIAL_NAME__
   type: redis-ce

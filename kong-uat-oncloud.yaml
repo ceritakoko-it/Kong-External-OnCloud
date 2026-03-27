@@ -251,7 +251,7 @@ consumers:
       hide_client_headers: false
       hour: null
       limit_by: consumer
-      minute: 1
+      minute: 100
       month: null
       path: null
       policy: redis
@@ -285,7 +285,7 @@ consumers:
       hide_client_headers: false
       hour: null
       limit_by: consumer
-      minute: 1
+      minute: 100
       month: null
       path: null
       policy: redis
@@ -417,8 +417,8 @@ plugins:
 services:
 - connect_timeout: 60000
   enabled: true
-  host: uat3-apigw.kaotim.my
-  name: UAT3-Kaotim
+  host: uat1-apigw.kaotim.my
+  name: Kaotim-Cloud
   plugins:
   - config:
       functions:
@@ -885,10 +885,6 @@ services:
       ws_upstream_frame: []
     enabled: true
     name: post-function
-    ordering:
-      after:
-        access:
-        - openid-connect
     protocols:
     - grpc
     - grpcs
@@ -1762,3 +1758,7 @@ vaults:
     config_store_id: bd2430ef-0eb8-45fe-8cb7-d8f75bf3fca0
   name: konnect
   prefix: identity
+- config:
+    config_store_id: 3c33efa6-b83a-43df-8255-466da924638f
+  name: konnect
+  prefix: redis
