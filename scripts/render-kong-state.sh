@@ -58,6 +58,7 @@ for var_name in "${required_vars[@]}"; do
 done
 
 REDIS_VAULT_CONFIG_STORE_ID="${REDIS_VAULT_CONFIG_STORE_ID:-$VAULT_CONFIG_STORE_ID}"
+REDIS_VAULT_ID="${REDIS_VAULT_ID:-}"
 
 # Normalize current env model:
 # - Dev/Uat can keep the original single-Redis variables.
@@ -171,7 +172,8 @@ export \
   ACTIVE_REDIS_PARTIAL_NAME \
   ACTIVE_REDIS_CACHE_PARTIAL_ID \
   ACTIVE_REDIS_CACHE_PARTIAL_NAME \
-  REDIS_VAULT_CONFIG_STORE_ID
+  REDIS_VAULT_CONFIG_STORE_ID \
+  REDIS_VAULT_ID
 
 if [ "$HAS_PREPROD_REDIS" = true ]; then
   export \
@@ -269,6 +271,10 @@ fi
 
 find "$OUTPUT_DIR" -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.md" \) -print0 | while IFS= read -r -d '' file; do
   perl -0pe '
+    my $redis_vault_id = $ENV{"REDIS_VAULT_ID"} // "";
+    s/^([ \t]*)__OPTIONAL_REDIS_VAULT_ID__[ \t]*\r?\n/
+      $redis_vault_id ne "" ? $1 . "id: " . $redis_vault_id . "\n" : ""/gme;
+
     my %repl = (
       "__CONTROL_PLANE_NAME__" => $ENV{"CONTROL_PLANE_NAME"},
       "__PUBLIC_HOST_PRIMARY__" => $ENV{"PUBLIC_HOST_PRIMARY"},

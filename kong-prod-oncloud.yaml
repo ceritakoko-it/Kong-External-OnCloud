@@ -332,6 +332,58 @@ partials:
     connect_timeout: 2000
     connection_is_proxied: false
     database: 0
+    host: redis-master.redis.svc.cluster.local
+    keepalive_backlog: 0
+    keepalive_pool_size: 256
+    password: '{vault://redis/redis_preprod}'
+    port: 6379
+    read_timeout: 2000
+    send_timeout: 2000
+    sentinel_master: null
+    sentinel_nodes: null
+    sentinel_password: null
+    sentinel_role: null
+    sentinel_username: null
+    server_name: null
+    ssl: false
+    ssl_verify: false
+    username: null
+  id: abb3131e-fc58-444c-a12d-708259f17cae
+  name: on-cloud-preprod-redis
+  type: redis-ee
+- config:
+    cloud_authentication: null
+    cluster_max_redirections: 5
+    cluster_nodes: null
+    connect_timeout: 2000
+    connection_is_proxied: false
+    database: 0
+    host: redis-master.redis.svc.cluster.local
+    keepalive_backlog: 0
+    keepalive_pool_size: 256
+    password: '{vault://redis/redis_preprod}'
+    port: 6379
+    read_timeout: 2000
+    send_timeout: 2000
+    sentinel_master: null
+    sentinel_nodes: null
+    sentinel_password: null
+    sentinel_role: null
+    sentinel_username: null
+    server_name: null
+    ssl: false
+    ssl_verify: false
+    username: null
+  id: f26ebc9c-d5f5-4eac-b580-ae230eaef52a
+  name: on-cloud-preprod-redis-cache
+  type: redis-ee
+- config:
+    cloud_authentication: null
+    cluster_max_redirections: 5
+    cluster_nodes: null
+    connect_timeout: 2000
+    connection_is_proxied: false
+    database: 0
     host: 127.0.0.1
     keepalive_backlog: 0
     keepalive_pool_size: 256
@@ -345,7 +397,7 @@ partials:
       port: 26379
     - host: redis-node-1.redis-headless.redis.svc.cluster.local
       port: 26379
-    sentinel_password: Redis@Kaotim#2026$
+    sentinel_password: '{vault://redis/redis_prod}'
     sentinel_role: master
     sentinel_username: null
     server_name: null
@@ -375,7 +427,7 @@ partials:
       port: 26379
     - host: redis-node-1.redis-headless.redis.svc.cluster.local
       port: 26379
-    sentinel_password: Redis@Kaotim#2026$
+    sentinel_password: '{vault://redis/redis_prod}'
     sentinel_role: master
     sentinel_username: null
     server_name: null
@@ -1797,6 +1849,6 @@ vaults:
   name: konnect
   prefix: identity
 - config:
-    config_store_id: 7a570b90-c461-4e1e-99b8-fbab9bff86ae
+    config_store_id: 6e67a0a2-4079-42a7-a6d7-dfe1aeeed665
   name: konnect
   prefix: redis

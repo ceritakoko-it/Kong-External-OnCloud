@@ -311,7 +311,7 @@ partials:
     cloud_authentication: null
     database: 0
     host: 10.8.3.70
-    password: '{vault://identity/redis-cache-password}'
+    password: '{vault://redis/redis_uat}'
     port: 6379
     server_name: null
     ssl: false
@@ -331,7 +331,7 @@ partials:
     host: 10.8.3.70
     keepalive_backlog: 0
     keepalive_pool_size: 256
-    password: '{vault://identity/redis-cache-password}'
+    password: '{vault://redis/redis_uat}'
     port: 6379
     read_timeout: 2000
     send_timeout: 2000
@@ -1759,6 +1759,6 @@ vaults:
   name: konnect
   prefix: identity
 - config:
-    config_store_id: 3c33efa6-b83a-43df-8255-466da924638f
+    config_store_id: 76023d75-8e4e-4884-8d56-c37db94608d3
   name: konnect
   prefix: redis
