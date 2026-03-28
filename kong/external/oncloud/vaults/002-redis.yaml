@@ -1,0 +1,8 @@
+_format_version: "3.0"
+_konnect:
+  control_plane_name: __CONTROL_PLANE_NAME__
+vaults:
+- config:
+    config_store_id: __REDIS_VAULT_CONFIG_STORE_ID__
+  name: konnect
+  prefix: redis
