@@ -311,7 +311,7 @@ partials:
     cloud_authentication: null
     database: 0
     host: 10.8.2.68
-    password: '{vault://identity/redis-cache-password}'
+    password: '{vault://redis/redis_dev}'
     port: 6379
     server_name: null
     ssl: false
@@ -331,7 +331,7 @@ partials:
     host: 10.8.2.68
     keepalive_backlog: 0
     keepalive_pool_size: 256
-    password: '{vault://identity/redis-cache-password}'
+    password: '{vault://redis/redis_dev}'
     port: 6379
     read_timeout: 2000
     send_timeout: 2000
@@ -1072,7 +1072,7 @@ services:
     - dev-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
-    - POST
+    - GET
     name: core-api-v1-kaotim-customer-profile-route
     path_handling: v0
     paths:
@@ -1759,6 +1759,6 @@ vaults:
   name: konnect
   prefix: identity
 - config:
-    config_store_id: a68557d0-7b87-41a2-a03d-d951de8adcd1
+    config_store_id: 44ffd0bc-8126-4bcf-998d-6a3465b56ca8
   name: konnect
   prefix: redis

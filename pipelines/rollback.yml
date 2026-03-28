@@ -11,7 +11,7 @@ parameters:
 stages:
 - stage: Rollback_To_${{ parameters.environment }}_${{ parameters.controlPlane }}
   displayName: Rollback to ${{ parameters.environment }} - ${{ parameters.controlPlane }}
-  condition: "and(succeeded(), ne('${{ parameters.rollbackBuildId }}', 'not-required'), or(and(eq('${{ parameters.environment }}', 'Dev'), eq(variables['Build.SourceBranch'], 'refs/heads/development')), and(or(eq('${{ parameters.environment }}', 'Uat'), eq('${{ parameters.environment }}', 'Prod')), eq(variables['Build.SourceBranch'], 'refs/heads/master'))))"
+  condition: "and(succeeded(), ne('${{ parameters.rollbackBuildId }}', 'not-required'), or(and(eq('${{ parameters.environment }}', 'Dev'), eq(variables['Build.SourceBranch'], 'refs/heads/development')), and(or(eq('${{ parameters.environment }}', 'Uat'), eq('${{ parameters.environment }}', 'Prod')), eq(variables['Build.SourceBranch'], 'refs/heads/master'))), not(and(eq('${{ parameters.controlPlane }}', 'OnCloud'), eq('${{ parameters.environment }}', 'PreProd'))))"
   jobs:
   - job: Rollback
     displayName: Rollback using backup dump artifact
@@ -54,6 +54,10 @@ stages:
         set -euo pipefail
         test -n "${KONG_TOKEN:-}" || { echo "KONG_TOKEN is empty or not set"; exit 1; }
         test -n "${KONG_ADDR:-}" || { echo "KONG_ADDR is empty or not set"; exit 1; }
+        if [ "${{ parameters.controlPlane }}" = "OnCloud" ] && [ "${{ parameters.environment }}" = "PreProd" ]; then
+          echo "Rollback is not supported for PreProd on OnCloud."
+          exit 1
+        fi
         test -n "${ROLLBACK_BUILD_ID:-}" || { echo "rollbackBuildId parameter is empty"; exit 1; }
         if [ "$ROLLBACK_BUILD_ID" = "not-required" ]; then
           echo "rollbackBuildId is required when mode=rollback"
