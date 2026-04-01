@@ -8,6 +8,7 @@ __OPTIONAL_PUBLIC_HOST_SECONDARY__
   https_redirect_status_code: 426
   methods:
   - POST
+  - OPTIONS
   name: general-services-v1-motor-generate-renewal-link-route
   path_handling: v0
   paths:
