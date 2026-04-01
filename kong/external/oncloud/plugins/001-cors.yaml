@@ -18,7 +18,7 @@ plugins:
     - OPTIONS
     - TRACE
     - CONNECT
-    origins: null
+    origins: __CORS_ORIGINS__
     preflight_continue: false
     private_network: false
   enabled: true
