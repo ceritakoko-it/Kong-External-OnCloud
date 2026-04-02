@@ -15,41 +15,6 @@ __OPTIONAL_PUBLIC_HOST_SECONDARY__
   - /general-services/motor/decrypt-renewal-link
   plugins:
   - config:
-      access:
-      - |-
-        kong.service.request.enable_buffering()
-
-        local body, err = kong.request.get_body()
-        if body and body ~= "" then
-            kong.log.set_serialize_value("request.body", body)
-        else
-            kong.log.set_serialize_value("request.body", "no request body")
-        end
-      body_filter: []
-      certificate: []
-      functions: []
-      header_filter: []
-      log:
-      - |-
-        local response_body = kong.service.response.get_body()
-        if response_body and response_body ~= "" then
-            kong.log.set_serialize_value("response.body", response_body)
-        else
-            kong.log.set_serialize_value("response.body", "no response body")
-        end
-      rewrite: []
-      ws_client_frame: []
-      ws_close: []
-      ws_handshake: []
-      ws_upstream_frame: []
-    enabled: true
-    name: pre-function
-    protocols:
-    - grpc
-    - grpcs
-    - http
-    - https
-  - config:
       add:
         body: []
         headers: []

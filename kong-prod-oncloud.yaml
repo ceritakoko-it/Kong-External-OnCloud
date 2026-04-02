@@ -454,7 +454,9 @@ plugins:
     - OPTIONS
     - TRACE
     - CONNECT
-    origins: null
+    origins:
+    - https://connect.kaotim.my
+    - https://connect.kaotim.cloud
     preflight_continue: false
     private_network: false
   enabled: true
@@ -991,6 +993,7 @@ services:
     https_redirect_status_code: 426
     methods:
     - POST
+    - OPTIONS
     name: core-api-v1-family-certificate-download-route
     path_handling: v0
     paths:
@@ -1081,6 +1084,7 @@ services:
     https_redirect_status_code: 426
     methods:
     - GET
+    - OPTIONS
     name: core-api-v1-family-certificate-list-route
     path_handling: v0
     paths:
@@ -1103,6 +1107,7 @@ services:
     https_redirect_status_code: 426
     methods:
     - GET
+    - OPTIONS
     name: core-api-v1-family-customer-profile-route
     path_handling: v0
     paths:
@@ -1125,6 +1130,7 @@ services:
     https_redirect_status_code: 426
     methods:
     - GET
+    - OPTIONS
     name: core-api-v1-kaotim-customer-profile-route
     path_handling: v0
     paths:
@@ -1147,6 +1153,7 @@ services:
     https_redirect_status_code: 426
     methods:
     - POST
+    - OPTIONS
     name: core-api-v1-motor-certificate-download-car-route
     path_handling: v0
     paths:
@@ -1200,6 +1207,7 @@ services:
     https_redirect_status_code: 426
     methods:
     - POST
+    - OPTIONS
     name: core-api-v1-motor-certificate-download-motorcycle-route
     path_handling: v0
     paths:
@@ -1253,6 +1261,7 @@ services:
     https_redirect_status_code: 426
     methods:
     - GET
+    - OPTIONS
     name: core-api-v1-motor-certificate-list-route
     path_handling: v0
     paths:
@@ -1275,6 +1284,7 @@ services:
     https_redirect_status_code: 426
     methods:
     - GET
+    - OPTIONS
     name: core-api-v1-motor-customer-profile-route
     path_handling: v0
     paths:
@@ -1297,6 +1307,7 @@ services:
     https_redirect_status_code: 426
     methods:
     - POST
+    - OPTIONS
     name: core-api-v1-motor-ereceipt-download-route
     path_handling: v0
     paths:
@@ -1350,6 +1361,7 @@ services:
     https_redirect_status_code: 426
     methods:
     - GET
+    - OPTIONS
     name: core-api-v2-family-certificate-details-route
     path_handling: v0
     paths:
@@ -1440,6 +1452,7 @@ services:
     https_redirect_status_code: 426
     methods:
     - GET
+    - OPTIONS
     name: core-api-v2-motor-certificate-details-route
     path_handling: v0
     paths:
@@ -1530,6 +1543,7 @@ services:
     https_redirect_status_code: 426
     methods:
     - GET
+    - OPTIONS
     name: general-services-v1-create-cp-id-retry-failed-route
     path_handling: v0
     paths:
@@ -1619,6 +1633,7 @@ services:
     https_redirect_status_code: 426
     methods:
     - POST
+    - OPTIONS
     name: general-services-v1-create-cp-id-route
     path_handling: v0
     paths:
@@ -1671,6 +1686,7 @@ services:
     https_redirect_status_code: 426
     methods:
     - POST
+    - OPTIONS
     name: general-services-v1-motor-decrypt-renewal-link-route
     path_handling: v0
     paths:
@@ -1758,6 +1774,7 @@ services:
     https_redirect_status_code: 426
     methods:
     - POST
+    - OPTIONS
     name: general-services-v1-motor-generate-renewal-link-route
     path_handling: v0
     paths:

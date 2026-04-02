@@ -467,6 +467,205 @@ services:
     - http
     - https
   - config:
+      access:
+      - |-
+        kong.service.request.enable_buffering()
+
+        local b = kong.request.get_raw_body()
+        if b then
+          kong.ctx.shared.req_body = b
+        end
+      body_filter:
+      - |-
+        local chunk = ngx.arg[1]
+        local eof   = ngx.arg[2]
+
+        kong.ctx.shared.res_chunks = kong.ctx.shared.res_chunks or {}
+
+        if chunk and #chunk > 0 then
+          table.insert(kong.ctx.shared.res_chunks, chunk)
+        end
+
+        if eof then
+          kong.ctx.shared.res_body = table.concat(kong.ctx.shared.res_chunks)
+          kong.ctx.shared.res_chunks = nil
+        end
+      certificate: []
+      functions: []
+      header_filter: []
+      log:
+      - |-
+        local function replace_json_key(s, key)
+          s = s:gsub('("' .. key .. '"%s*:%s*")([^"]*)(")', '%1*REDACTED*%3')
+          return s
+        end
+
+        local function replace_xml_tag(s, tag)
+          s = s:gsub("(<" .. tag .. ">)(.-)(</" .. tag .. ">)", "%1*REDACTED*%3")
+          return s
+        end
+
+        local function replace_xml_attr(s, attr)
+          s = s:gsub("(" .. attr .. '=")([^"]*)(")', "%1*REDACTED*%3")
+          return s
+        end
+
+        local function looks_like_pdf(s)
+          return type(s) == "string" and s:find("^%%PDF%-")
+        end
+
+        local function looks_like_html(s)
+          if type(s) ~= "string" then
+            return false
+          end
+          local lower = s:lower()
+          return lower:find("<!doctype html", 1, true)
+              or lower:find("<html", 1, true)
+              or lower:find("<body", 1, true)
+        end
+
+        local function redact_text(s)
+          if type(s) ~= "string" then
+            return s
+          end
+
+          local json_keys = {
+            "token", "apiToken", "access_token", "refresh_token", "accessToken", "refreshToken",
+            "password", "passwd", "secret", "apiKey", "sessionId",
+            "nric", "userNric", "nric_no", "identificationNumber",
+            "fullName", "full_name", "userName",
+            "email", "userEmail",
+            "phone", "userMobile", "mobileNumber",
+            "address", "postcode",
+            "eCertNo", "e_cover_note", "e_covernote",
+            "QuotationNo", "policy_no", "reference_no",
+            "vehRegNo", "vehicle_no",
+            "rawDecryptedValue",
+            "clientKey", "client_key", "tempKey", "temp_key",
+            "renewalUrl"
+          }
+
+          for _, key in ipairs(json_keys) do
+            s = replace_json_key(s, key)
+          end
+
+          local xml_tags = {
+            "apiToken", "clientKey", "nric", "userNric", "fullName",
+            "email", "mobileNumber", "QuotationNo"
+          }
+
+          for _, tag in ipairs(xml_tags) do
+            s = replace_xml_tag(s, tag)
+          end
+
+          local xml_attrs = {
+            "client_key", "temp_key", "tempKey"
+          }
+
+          for _, attr in ipairs(xml_attrs) do
+            s = replace_xml_attr(s, attr)
+          end
+
+          s = s:gsub("[A-Za-z0-9-_]+%.[A-Za-z0-9-_]+%.[A-Za-z0-9-_]+", "*REDACTED*")
+          s = s:gsub("%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x", "*REDACTED*")
+          s = s:gsub("[a-zA-Z0-9%.%%%+%-]+@[a-zA-Z0-9%.%-]+%.[a-zA-Z][a-zA-Z]+", "*REDACTED*")
+          s = s:gsub("%f[%d]%d%d%d%d%d%d%d%d%d%d%d%f[%D]", "*REDACTED*")
+          s = s:gsub("%f[%d]%d%d%d%d%d%d%-%d%d%-%d%d%d%d%f[%D]", "*REDACTED*")
+          s = s:gsub("%f[%d]0%d%d%d%d%d%d%d%d%d?%f[%D]", "*REDACTED*")
+          s = s:gsub("%f[%d]6%d%d%d%d%d%d%d%d%d?%f[%D]", "*REDACTED*")
+
+          return s
+        end
+
+        local function process_body(raw)
+          if not raw or raw == "" then
+            return nil
+          end
+
+          if looks_like_pdf(raw) then
+            return "*REDACTED_BINARY_PDF*"
+          end
+
+          if looks_like_html(raw) then
+            return "*REDACTED_HTML_BODY*"
+          end
+
+          return redact_text(raw)
+        end
+
+        local function sanitize_urlish(value)
+          if type(value) ~= "string" then
+            return value
+          end
+
+          value = value:gsub("([?&]e_certificate_no=)[^&]+", "%1*REDACTED*")
+          value = value:gsub("([?&]nric=)[^&]+", "%1*REDACTED*")
+          value = value:gsub("([?&]userNric=)[^&]+", "%1*REDACTED*")
+          value = value:gsub("([?&]identificationNumber=)[^&]+", "%1*REDACTED*")
+          value = value:gsub("([?&]vehRegNo=)[^&]+", "%1*REDACTED*")
+          value = value:gsub("([?&]vehicle_no=)[^&]+", "%1*REDACTED*")
+          value = value:gsub("([?&]policy_no=)[^&]+", "%1*REDACTED*")
+          value = value:gsub("([?&]reference_no=)[^&]+", "%1*REDACTED*")
+          return value
+        end
+
+        local req = process_body(kong.ctx.shared.req_body)
+        if req then
+          kong.log.set_serialize_value("request.body", req)
+        end
+
+        local res = process_body(kong.ctx.shared.res_body)
+        if res then
+          kong.log.set_serialize_value("response.body", res)
+        end
+
+        kong.log.set_serialize_value("request.headers.authorization", "*REDACTED*")
+        kong.log.set_serialize_value("request.headers.cookie", "*REDACTED*")
+        kong.log.set_serialize_value("response.headers.set-cookie", "*REDACTED*")
+
+        local request_uri = kong.request.get_path_with_query()
+        if request_uri then
+          kong.log.set_serialize_value("request.uri", sanitize_urlish(request_uri))
+        end
+
+        local scheme = kong.request.get_scheme()
+        local host = kong.request.get_host()
+        if scheme and host and request_uri then
+          kong.log.set_serialize_value("request.url", sanitize_urlish(scheme .. "://" .. host .. request_uri))
+        end
+
+        local raw_query = kong.request.get_query()
+        if type(raw_query) == "table" then
+          local query_keys = {
+            "e_certificate_no", "nric", "userNric", "identificationNumber",
+            "vehRegNo", "vehicle_no", "policy_no", "reference_no"
+          }
+
+          for _, key in ipairs(query_keys) do
+            if raw_query[key] ~= nil then
+              kong.log.set_serialize_value("request.querystring." .. key, "*REDACTED*")
+            end
+          end
+        end
+
+        local upstream_uri = kong.ctx and kong.ctx.core and kong.ctx.core.upstream_uri
+        if type(upstream_uri) == "string" then
+          kong.log.set_serialize_value("upstream_uri", sanitize_urlish(upstream_uri))
+        end
+      rewrite: []
+      ws_client_frame: []
+      ws_close: []
+      ws_handshake: []
+      ws_upstream_frame: []
+    enabled: true
+    instance_name: Kaotim-Cloud-Transaction-Log-Redaction
+    name: pre-function
+    protocols:
+    - grpc
+    - grpcs
+    - http
+    - https
+  - config:
       custom_fields_by_lua: {}
       path: /usr/local/kong/logs/transaction.log
       reopen: false

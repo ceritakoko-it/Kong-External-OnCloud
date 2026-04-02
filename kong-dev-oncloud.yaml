@@ -446,8 +446,8 @@ services:
     - dev-connect.kaotim.cloud
     https_redirect_status_code: 426
     methods:
-    - OPTIONS
     - POST
+    - OPTIONS
     name: OIDC-Get-Token
     path_handling: v0
     paths:
