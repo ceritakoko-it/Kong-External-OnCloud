@@ -9,8 +9,9 @@ services:
   path: /auth/oauth/token
   plugins:
   - config:
-      custom_fields_by_lua: {}
-      path: /usr/local/kong/logs/transaction.log
+      custom_fields_by_lua:
+        log_type: '"transaction"'
+      path: /dev/stdout
       reopen: false
     enabled: true
     name: file-log

@@ -86,7 +86,9 @@ fetch_access_token() {
   local token_http_code
   local time_total
   local access_token
+  local curl_rc=0
 
+  set +e
   read -r token_http_code time_total <<< "$(
     curl -sS \
       --connect-timeout "${CONNECT_TIMEOUT_SECONDS}" \
@@ -99,13 +101,19 @@ fetch_access_token() {
       --data-urlencode "client_id=${TOKEN_CLIENT_ID_VALUE}" \
       --data-urlencode "client_secret=${TOKEN_CLIENT_SECRET_VALUE}"
   )"
+  curl_rc=$?
+  set -e
 
-  if [ "${token_http_code}" != "200" ]; then
-    print_result "FAIL" "OnCloud" "POST" "Get Access Token" "${token_http_code}" "${time_total}"
-    if [ -s "${token_response_file}" ]; then
-      printf '  detail: %s\n' "$(tr '\r\n' ' ' < "${token_response_file}" | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//')"
+  if [ "${curl_rc}" -ne 0 ] || [ "${token_http_code}" != "200" ]; then
+    if [ "${token_http_code:-000}" = "000" ] || [ -z "${token_http_code:-}" ]; then
+      token_http_code="CURL-${curl_rc}"
     fi
-    exit 1
+    time_total="${time_total:-0}"
+    print_result "FAIL" "OnCloud" "POST" "Get Access Token" "${token_http_code}" "${time_total}" >&2
+    if [ -s "${token_response_file}" ]; then
+      printf '  detail: %s\n' "$(tr '\r\n' ' ' < "${token_response_file}" | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//')" >&2
+    fi
+    return 1
   fi
 
   print_result "PASS" "OnCloud" "POST" "Get Access Token" "${token_http_code}" "${time_total}" >&2
@@ -198,7 +206,9 @@ run_post_test() {
   print_result "PASS" "${category}" "POST" "${test_name}" "${http_code}" "${time_total}"
 }
 
-ACCESS_TOKEN="$(fetch_access_token)"
+if ! ACCESS_TOKEN="$(fetch_access_token)"; then
+  exit 1
+fi
 export ACCESS_TOKEN
 
 run_post_test "OnCloud" "Core API Family V1 Download" "/core-api/family/download" "${FAMILY_CERTIFICATE_DOWNLOAD_BODY}"
