@@ -666,8 +666,8 @@ services:
     - https
   - config:
       custom_fields_by_lua:
-        log_type: '"transaction"'
-      path: /dev/stdout
+        log_type: "'__FILE_LOG_ENV_CLASS__'"
+      path: __FILE_LOG_PATH__
       reopen: false
     enabled: true
     name: file-log
