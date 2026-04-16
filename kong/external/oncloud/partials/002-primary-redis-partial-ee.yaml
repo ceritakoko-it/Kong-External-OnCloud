@@ -13,7 +13,7 @@ partials:
     keepalive_backlog: 0
     keepalive_pool_size: 256
     password: __PRIMARY_REDIS_PARTIAL_PASSWORD__
-    port: 6379
+    port: __PRIMARY_REDIS_PARTIAL_PORT__
     read_timeout: 2000
     send_timeout: 2000
     sentinel_master: __PRIMARY_REDIS_PARTIAL_SENTINEL_MASTER__
@@ -21,9 +21,9 @@ partials:
     sentinel_password: __PRIMARY_REDIS_PARTIAL_SENTINEL_PASSWORD__
     sentinel_role: __PRIMARY_REDIS_PARTIAL_SENTINEL_ROLE__
     sentinel_username: __PRIMARY_REDIS_PARTIAL_SENTINEL_USERNAME__
-    server_name: null
-    ssl: false
-    ssl_verify: false
+    server_name: __PRIMARY_REDIS_PARTIAL_SERVER_NAME__
+    ssl: __PRIMARY_REDIS_PARTIAL_SSL__
+    ssl_verify: __PRIMARY_REDIS_PARTIAL_SSL_VERIFY__
     username: __PRIMARY_REDIS_PARTIAL_USERNAME__
   id: __PRIMARY_REDIS_PARTIAL_ID__
   name: __PRIMARY_REDIS_PARTIAL_NAME__

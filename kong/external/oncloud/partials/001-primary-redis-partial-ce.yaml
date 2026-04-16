@@ -7,10 +7,10 @@ partials:
     database: 0
     host: __PRIMARY_REDIS_PARTIAL_HOST__
     password: __PRIMARY_REDIS_PARTIAL_PASSWORD__
-    port: 6379
-    server_name: null
-    ssl: false
-    ssl_verify: false
+    port: __PRIMARY_REDIS_PARTIAL_PORT__
+    server_name: __PRIMARY_REDIS_PARTIAL_SERVER_NAME__
+    ssl: __PRIMARY_REDIS_PARTIAL_SSL__
+    ssl_verify: __PRIMARY_REDIS_PARTIAL_SSL_VERIFY__
     timeout: 2000
     username: __PRIMARY_REDIS_PARTIAL_USERNAME__
   id: __PRIMARY_REDIS_PARTIAL_ID__
