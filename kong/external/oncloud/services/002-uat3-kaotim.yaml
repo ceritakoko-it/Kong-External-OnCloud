@@ -494,18 +494,85 @@ services:
       header_filter: []
       log:
       - |-
+        local function full_redact(_)
+          return "*REDACTED*"
+        end
+
+        local function partial_mask(value)
+          if type(value) ~= "string" then
+            return value
+          end
+
+          local len = #value
+          if len == 0 then
+            return value
+          end
+          if len == 1 then
+            return "*"
+          end
+          if len == 2 then
+            return value:sub(1, 1) .. "*"
+          end
+
+          return value:sub(1, 1) .. string.rep("*", len - 2) .. value:sub(len, len)
+        end
+
+        local function partial_mask_email(value)
+          if type(value) ~= "string" then
+            return value
+          end
+
+          local local_part, domain = value:match("^([^@]+)@(.+)$")
+          if not local_part or not domain then
+            return partial_mask(value)
+          end
+
+          return partial_mask(local_part) .. "@" .. domain
+        end
+
+        local partial_redact_json_keys = {
+          nric = true, userNric = true, nric_no = true, identificationNumber = true,
+          fullName = true, full_name = true, userName = true, email = true,
+          userEmail = true, phone = true, userMobile = true, mobileNumber = true,
+          address = true, postcode = true, eCertNo = true, e_cover_note = true,
+          e_covernote = true, QuotationNo = true, policy_no = true,
+          reference_no = true, vehRegNo = true, vehicle_no = true
+        }
+
+        local email_like_json_keys = {
+          email = true, userEmail = true
+        }
+
+        local function mask_value_by_key(key, value)
+          if email_like_json_keys[key] then
+            return partial_mask_email(value)
+          end
+
+          if partial_redact_json_keys[key] then
+            return partial_mask(value)
+          end
+
+          return full_redact(value)
+        end
+
         local function replace_json_key(s, key)
-          s = s:gsub('("' .. key .. '"%s*:%s*")([^"]*)(")', '%1*REDACTED*%3')
+          s = s:gsub('("' .. key .. '"%s*:%s*")([^"]*)(")', function(prefix, value, suffix)
+            return prefix .. mask_value_by_key(key, value) .. suffix
+          end)
           return s
         end
 
-        local function replace_xml_tag(s, tag)
-          s = s:gsub("(<" .. tag .. ">)(.-)(</" .. tag .. ">)", "%1*REDACTED*%3")
+        local function replace_xml_tag(s, tag, masker)
+          s = s:gsub("(<" .. tag .. ">)(.-)(</" .. tag .. ">)", function(prefix, value, suffix)
+            return prefix .. masker(value) .. suffix
+          end)
           return s
         end
 
-        local function replace_xml_attr(s, attr)
-          s = s:gsub("(" .. attr .. '=")([^"]*)(")', "%1*REDACTED*%3")
+        local function replace_xml_attr(s, attr, masker)
+          s = s:gsub("(" .. attr .. '=")([^"]*)(")', function(prefix, value, suffix)
+            return prefix .. masker(value) .. suffix
+          end)
           return s
         end
 
@@ -548,30 +615,41 @@ services:
             s = replace_json_key(s, key)
           end
 
-          local xml_tags = {
-            "apiToken", "clientKey", "nric", "userNric", "fullName",
-            "email", "mobileNumber", "QuotationNo"
+          local xml_full_redact_tags = {
+            "apiToken", "clientKey", "tempKey"
           }
 
-          for _, tag in ipairs(xml_tags) do
-            s = replace_xml_tag(s, tag)
+          for _, tag in ipairs(xml_full_redact_tags) do
+            s = replace_xml_tag(s, tag, full_redact)
           end
 
-          local xml_attrs = {
+          local xml_partial_redact_tags = {
+            "nric", "userNric", "fullName", "email", "mobileNumber", "QuotationNo"
+          }
+
+          for _, tag in ipairs(xml_partial_redact_tags) do
+            if tag == "email" then
+              s = replace_xml_tag(s, tag, partial_mask_email)
+            else
+              s = replace_xml_tag(s, tag, partial_mask)
+            end
+          end
+
+          local xml_full_redact_attrs = {
             "client_key", "temp_key", "tempKey"
           }
 
-          for _, attr in ipairs(xml_attrs) do
-            s = replace_xml_attr(s, attr)
+          for _, attr in ipairs(xml_full_redact_attrs) do
+            s = replace_xml_attr(s, attr, full_redact)
           end
 
           s = s:gsub("[A-Za-z0-9-_]+%.[A-Za-z0-9-_]+%.[A-Za-z0-9-_]+", "*REDACTED*")
           s = s:gsub("%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x", "*REDACTED*")
-          s = s:gsub("[a-zA-Z0-9%.%%%+%-]+@[a-zA-Z0-9%.%-]+%.[a-zA-Z][a-zA-Z]+", "*REDACTED*")
-          s = s:gsub("%f[%d]%d%d%d%d%d%d%d%d%d%d%d%f[%D]", "*REDACTED*")
-          s = s:gsub("%f[%d]%d%d%d%d%d%d%-%d%d%-%d%d%d%d%f[%D]", "*REDACTED*")
-          s = s:gsub("%f[%d]0%d%d%d%d%d%d%d%d%d?%f[%D]", "*REDACTED*")
-          s = s:gsub("%f[%d]6%d%d%d%d%d%d%d%d%d?%f[%D]", "*REDACTED*")
+          s = s:gsub("[a-zA-Z0-9%.%%%+%-]+@[a-zA-Z0-9%.%-]+%.[a-zA-Z][a-zA-Z]+", partial_mask_email)
+          s = s:gsub("%f[%d]%d%d%d%d%d%d%d%d%d%d%d%f[%D]", partial_mask)
+          s = s:gsub("%f[%d]%d%d%d%d%d%d%-%d%d%-%d%d%d%d%f[%D]", partial_mask)
+          s = s:gsub("%f[%d]0%d%d%d%d%d%d%d%d%d?%f[%D]", partial_mask)
+          s = s:gsub("%f[%d]6%d%d%d%d%d%d%d%d%d?%f[%D]", partial_mask)
 
           return s
         end
@@ -597,14 +675,14 @@ services:
             return value
           end
 
-          value = value:gsub("([?&]e_certificate_no=)[^&]+", "%1*REDACTED*")
-          value = value:gsub("([?&]nric=)[^&]+", "%1*REDACTED*")
-          value = value:gsub("([?&]userNric=)[^&]+", "%1*REDACTED*")
-          value = value:gsub("([?&]identificationNumber=)[^&]+", "%1*REDACTED*")
-          value = value:gsub("([?&]vehRegNo=)[^&]+", "%1*REDACTED*")
-          value = value:gsub("([?&]vehicle_no=)[^&]+", "%1*REDACTED*")
-          value = value:gsub("([?&]policy_no=)[^&]+", "%1*REDACTED*")
-          value = value:gsub("([?&]reference_no=)[^&]+", "%1*REDACTED*")
+          value = value:gsub("([?&]e_certificate_no=)([^&]+)", function(prefix, raw) return prefix .. partial_mask(raw) end)
+          value = value:gsub("([?&]nric=)([^&]+)", function(prefix, raw) return prefix .. partial_mask(raw) end)
+          value = value:gsub("([?&]userNric=)([^&]+)", function(prefix, raw) return prefix .. partial_mask(raw) end)
+          value = value:gsub("([?&]identificationNumber=)([^&]+)", function(prefix, raw) return prefix .. partial_mask(raw) end)
+          value = value:gsub("([?&]vehRegNo=)([^&]+)", function(prefix, raw) return prefix .. partial_mask(raw) end)
+          value = value:gsub("([?&]vehicle_no=)([^&]+)", function(prefix, raw) return prefix .. partial_mask(raw) end)
+          value = value:gsub("([?&]policy_no=)([^&]+)", function(prefix, raw) return prefix .. partial_mask(raw) end)
+          value = value:gsub("([?&]reference_no=)([^&]+)", function(prefix, raw) return prefix .. partial_mask(raw) end)
           return value
         end
 
@@ -642,7 +720,11 @@ services:
 
           for _, key in ipairs(query_keys) do
             if raw_query[key] ~= nil then
-              kong.log.set_serialize_value("request.querystring." .. key, "*REDACTED*")
+              local value = raw_query[key]
+              if type(value) == "table" then
+                value = value[1]
+              end
+              kong.log.set_serialize_value("request.querystring." .. key, partial_mask(tostring(value)))
             end
           end
         end
