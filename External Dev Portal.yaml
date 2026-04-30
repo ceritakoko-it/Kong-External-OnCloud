@@ -1,0 +1,277 @@
+openapi: "3.0.0"
+info:
+  title: "Kong Konnect External APIs (Dev OnCloud)"
+  version: "1.0.0"
+  description: "External services exposed through Kong Gateway. Call /api/token first to obtain an access token, then reuse Authorization: Bearer <access_token> for protected APIs."
+servers:
+  - url: "https://dev-connect.kaotim.my"
+    description: "External Kaotim API Dev Server"
+tags:
+  - name: "Token"
+    description: "OAuth token endpoint."
+  - name: "coreApi"
+    description: "Core API endpoints for family, motor, and customer profile flows."
+  - name: "core-api"
+    description: "Core API endpoints for family, motor, and customer profile flows."
+  - name: "generalServices"
+    description: "General services endpoints for CP ID and motor renewal link flows."
+paths:
+  "/api/token":
+    post:
+      tags:
+        - "Token"
+      summary: "OIDC Get Token"
+      description: "Generated from Kong route OIDC-Get-Token, service __CONTROL_PLANE_NAME__-Get-Token."
+      security: []
+      requestBody:
+        required: true
+        content:
+          "application/x-www-form-urlencoded":
+            schema:
+              type: "object"
+            example: |
+              {"grant_type":"client_credentials","client_id":"your-client-id","client_secret":"your-client-secret"}
+      responses:
+        "200":
+          description: "Success"
+  "/core-api-2/motor/certificate-details":
+    get:
+      tags:
+        - "core-api"
+      summary: "Core Api V2 Motor Certificate Details Route"
+      description: "Generated from Kong route core-api-v2-motor-certificate-details-route, service Kaotim-Cloud."
+      parameters:
+        - $ref: "#/components/parameters/AuthorizationHeader"
+        - name: "e_certificate_no"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "Success"
+  "/core-api/api/v1/customers/profile":
+    get:
+      tags:
+        - "core-api"
+      summary: "Core Api V1 Kaotim Customer Profile Route"
+      description: "Generated from Kong route core-api-v1-kaotim-customer-profile-route, service Kaotim-Cloud."
+      parameters:
+        - $ref: "#/components/parameters/AuthorizationHeader"
+      responses:
+        "200":
+          description: "Success"
+  "/core-api/api/v1/family/certificates":
+    get:
+      tags:
+        - "core-api"
+      summary: "Core Api V1 Family Certificate List Route"
+      description: "Generated from Kong route core-api-v1-family-certificate-list-route, service Kaotim-Cloud."
+      parameters:
+        - $ref: "#/components/parameters/AuthorizationHeader"
+      responses:
+        "200":
+          description: "Success"
+  "/core-api-2/family/certificate-details":
+    get:
+      tags:
+        - "coreApi"
+      summary: "Core Api V2 Family Certificate Details Route"
+      description: "Generated from Kong route core-api-v2-family-certificate-details-route, service Kaotim-Cloud."
+      parameters:
+        - $ref: "#/components/parameters/AuthorizationHeader"
+        - name: "e_certificate_no"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "Success"
+  "/core-api/api/v1/family/customers/profile":
+    get:
+      tags:
+        - "coreApi"
+      summary: "Core Api V1 Family Customer Profile Route"
+      description: "Generated from Kong route core-api-v1-family-customer-profile-route, service Kaotim-Cloud."
+      parameters:
+        - $ref: "#/components/parameters/AuthorizationHeader"
+      responses:
+        "200":
+          description: "Success"
+  "/core-api/api/v1/motor/certificates":
+    get:
+      tags:
+        - "coreApi"
+      summary: "Core Api V1 Motor Certificate List Route"
+      description: "Generated from Kong route core-api-v1-motor-certificate-list-route, service Kaotim-Cloud."
+      parameters:
+        - $ref: "#/components/parameters/AuthorizationHeader"
+      responses:
+        "200":
+          description: "Success"
+  "/core-api/api/v1/motor/customers/profile":
+    get:
+      tags:
+        - "coreApi"
+      summary: "Core Api V1 Motor Customer Profile Route"
+      description: "Generated from Kong route core-api-v1-motor-customer-profile-route, service Kaotim-Cloud."
+      parameters:
+        - $ref: "#/components/parameters/AuthorizationHeader"
+      responses:
+        "200":
+          description: "Success"
+  "/core-api/family/download":
+    post:
+      tags:
+        - "coreApi"
+      summary: "Core Api V1 Family Certificate Download Route"
+      description: "Generated from Kong route core-api-v1-family-certificate-download-route, service Kaotim-Cloud."
+      parameters:
+        - $ref: "#/components/parameters/AuthorizationHeader"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: "object"
+            example: |
+              {"policyNo":"<policy-no>","documentType":"<document-type>"}
+      responses:
+        "200":
+          description: "Success"
+  "/core-api/motor/certificates/download-car":
+    post:
+      tags:
+        - "coreApi"
+      summary: "Core Api V1 Motor Certificate Download Car Route"
+      description: "Generated from Kong route core-api-v1-motor-certificate-download-car-route, service Kaotim-Cloud."
+      parameters:
+        - $ref: "#/components/parameters/AuthorizationHeader"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: "object"
+            example: |
+              {"cover_note_no":"<cover-note-no>","language":"BM"}
+      responses:
+        "200":
+          description: "Success"
+  "/core-api/motor/certificates/download-motorcycle":
+    post:
+      tags:
+        - "coreApi"
+      summary: "Core Api V1 Motor Certificate Download Motorcycle Route"
+      description: "Generated from Kong route core-api-v1-motor-certificate-download-motorcycle-route, service Kaotim-Cloud."
+      parameters:
+        - $ref: "#/components/parameters/AuthorizationHeader"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: "object"
+            example: |
+              {"cover_note_no":"<cover-note-no>","language":"BM"}
+      responses:
+        "200":
+          description: "Success"
+  "/core-api/motor/e-receipt/download":
+    post:
+      tags:
+        - "coreApi"
+      summary: "Core Api V1 Motor Ereceipt Download Route"
+      description: "Generated from Kong route core-api-v1-motor-ereceipt-download-route, service Kaotim-Cloud."
+      parameters:
+        - $ref: "#/components/parameters/AuthorizationHeader"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: "object"
+            example: |
+              {"e_certificate_no":"<e-certificate-no>","payment_reference_no":"<payment-reference-no>","masked_card":"","vehicle_type":"car"}
+      responses:
+        "200":
+          description: "Success"
+  "/general-services/create-cp-id":
+    post:
+      tags:
+        - "generalServices"
+      summary: "General Services V1 Create Cp Id Route"
+      description: "Generated from Kong route general-services-v1-create-cp-id-route, service Kaotim-Cloud."
+      parameters:
+        - $ref: "#/components/parameters/AuthorizationHeader"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: "object"
+            example: |
+              {"userNric":"<nric>","userDob":"YYYY-MM-DD","userEmail":"user@example.com","userMobile":"<mobile>","userName":"<name>","userNricType":"N","eCertNo":"<e-cert-no>"}
+      responses:
+        "200":
+          description: "Success"
+  "/general-services/create-cp-id/retry-failed":
+    get:
+      tags:
+        - "generalServices"
+      summary: "General Services V1 Create Cp Id Retry Failed Route"
+      description: "Generated from Kong route general-services-v1-create-cp-id-retry-failed-route, service Kaotim-Cloud."
+      parameters:
+        - $ref: "#/components/parameters/AuthorizationHeader"
+      responses:
+        "200":
+          description: "Success"
+  "/general-services/motor/decrypt-renewal-link":
+    post:
+      tags:
+        - "generalServices"
+      summary: "General Services V1 Motor Decrypt Renewal Link Route"
+      description: "Generated from Kong route general-services-v1-motor-decrypt-renewal-link-route, service Kaotim-Cloud."
+      parameters:
+        - $ref: "#/components/parameters/AuthorizationHeader"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: "object"
+            example: |
+              {"link":"<renewal-link>"}
+      responses:
+        "200":
+          description: "Success"
+  "/general-services/motor/generate-renewal-link":
+    post:
+      tags:
+        - "generalServices"
+      summary: "General Services V1 Motor Generate Renewal Link Route"
+      description: "Generated from Kong route general-services-v1-motor-generate-renewal-link-route, service Kaotim-Cloud."
+      parameters:
+        - $ref: "#/components/parameters/AuthorizationHeader"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: "object"
+            example: |
+              {"product":"motor","identificationNumber":"<identification-number>","vehRegNo":"<vehicle-registration-no>"}
+      responses:
+        "200":
+          description: "Success"
+components:
+  parameters:
+    AuthorizationHeader:
+      name: "Authorization"
+      in: "header"
+      required: true
+      description: "Bearer token required by the OIDC plugin on the owning service or route."
+      schema:
+        type: "string"
+        example: "Bearer <access_token>"

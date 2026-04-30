@@ -2,6 +2,8 @@
 
 This repository is the source of truth for Kong decK configuration and promotion flow across environments.
 
+Detailed Azure DevOps operations documentation is available in [docs/azure-devops-system-guide.md](docs/azure-devops-system-guide.md).
+
 For `OnCloud`, the source of truth is:
 
 - shared base: `kong/external/oncloud`

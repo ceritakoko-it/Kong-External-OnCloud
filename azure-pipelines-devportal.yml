@@ -1,0 +1,14 @@
+trigger: none
+pr: none
+
+parameters:
+- name: outputSpec
+  displayName: Output OpenAPI spec
+  type: string
+  default: External Dev Portal.yaml
+
+stages:
+- template: pipelines/dev-portal.yml
+  parameters:
+    devportalEnvFile: kong/env/user/devportal.env
+    outputSpec: ${{ parameters.outputSpec }}
